@@ -7,19 +7,18 @@ class face_motor():
 		self.channel = channel
 		self.ulim = min(ulim, 0x0FFFF)
 		self.llim = max(llim, 0)
-		self.speed = 400
-		self.scalefactor = (self.ulim - self.llim) / (0xFFFF)
 		self.maxstep = step
-		self.output = round(self.scalefactor * ((self.ulim + self.llim) / 2) + self.llim)
+		self.output = round((self.ulim + self.llim) / 2)
+		self.pca.channels[self.channel].duty_cycle = self.output
+		# print(str(self.llim) + " " + str(self.ulim))
 		
 	def setCmd(self, cmd):
-		self.poscmd = round(self.scalefactor * cmd + self.llim)
-		self.err = self.poscmd - self.output
-		self.step = max(-self.maxstep, min(self.maxstep, self.err))
-		self.output = max(self.llim, min(self.output + self.step, self.ulim))			
-		self.pca.channels[self.channel].duty_cycle = self.output
+		# self.err = cmd - self.output
+		# self.step = max(-self.maxstep, min(self.maxstep, self.err))
+		# self.output = max(self.llim, min(self.output + self.step, self.ulim))			
+		self.pca.channels[self.channel].duty_cycle = cmd
 		
-		# print(str(self.poscmd) + " " + str(self.output) + " " + str(self.err))
+		print(str(cmd))
 		
 	def getPos(self):
 		return self.output	

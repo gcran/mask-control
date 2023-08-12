@@ -14,7 +14,7 @@ class bot_control(tk.Frame):
         self.master.title("J4N-U5 Control Panel")
         self.POS_MIN = 0x0
         self.POS_MAX = 0xFFFF
-        self.POS_RESOLUTION = 0x0010
+        self.POS_RESOLUTION = 0x10
         self.H_SCALE_LEN = 500
         self.V_SCALE_LEN = 200
         self.SCALE_INTERVAL = 45
@@ -25,9 +25,8 @@ class bot_control(tk.Frame):
         self.master.after(0, self.setOutput)
         
     def setOutput(self):
-        self.robot.update()
-                
-        self.master.after(self.robot.getRate(), self.setOutput)
+        self.robot.update()                
+        # self.master.after(self.robot.getRate(), self.setOutput)
         
     def button1Callback(self):
         self.mixer.stop()
@@ -47,9 +46,11 @@ class bot_control(tk.Frame):
         
     def eyeMoveSliderCallback(self, cmd):
         self.robot.setEyePosition(self.eyepos.get())
+        self.robot.update()  
         
     def eyeBlinkSliderCallback(self, cmd):
         self.robot.setEyeLidPosition(self.eyelidpos.get())
+        self.robot.update()  
         
     def mouthMoveSliderCallback(self, cmd):
         self.robot.setMouthPosition(self.mouthpos.get())
@@ -67,13 +68,13 @@ class bot_control(tk.Frame):
         # eye position slider
         self.eyepos = tk.IntVar()
         self.eyepos.set(round((self.POS_MAX - self.POS_MIN) / 2))
-        self.eyeposscale = tk.Scale(self.master,label="Eye Position", orient=tk.HORIZONTAL, from_=self.POS_MIN, to=self.POS_MAX, variable=self.eyepos, length=self.H_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeMoveSliderCallback)
+        self.eyeposscale = tk.Scale(self.master,label="Eye Position", orient=tk.HORIZONTAL, from_=self.robot.eye_move.llim, to=self.robot.eye_move.ulim, variable=self.eyepos, length=self.H_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeMoveSliderCallback)
         self.eyeposscale.grid(column=0, row=1, padx=10, pady=10, columnspan=3)
         
         # eyelid position slider
         self.eyelidpos = tk.IntVar()
         self.eyelidpos.set(self.POS_MAX)
-        self.eyelidposscale = tk.Scale(self.master,label="Eyelid Position", orient=tk.VERTICAL, from_=self.POS_MIN, to=self.POS_MAX, variable=self.eyelidpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeBlinkSliderCallback)
+        self.eyelidposscale = tk.Scale(self.master,label="Eyelid Position", orient=tk.VERTICAL, from_=self.robot.eye_lid.llim, to=self.robot.eye_lid.ulim, variable=self.eyelidpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeBlinkSliderCallback)
         self.eyelidposscale.grid(column=0, row=0, padx=10, pady=10)
         
         # mouth position slider

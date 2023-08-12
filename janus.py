@@ -12,21 +12,35 @@ class janus():
         # initialize i2c bus and PCA9685 Module
         self.i2c_bus = busio.I2C(SCL, SDA)
         self.pca = PCA9685(self.i2c_bus)
-        self.pca.frequency = 50
+        
         # load calibration file
         self.calfile = configparser.ConfigParser()
         self.calfile.read(filename)
         
+        self.freq = int(self.calfile['general']['frequency'], 10)
         self.update_rate = int(self.calfile['general']['update_period'])
+        self.pca.frequency = self.freq
+        
         #initialize devices
+        self.maxcount = 0xfff
+        
+        self.minpulse = float(self.calfile['eye.movement']['minpulse'])
+        self.maxpulse = float(self.calfile['eye.movement']['maxpulse'])
+        self.llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
+        self.ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10
         self.eye_move = face_motor(self.pca, int(self.calfile['eye.movement']['channel'], 10), \
-                                    int(self.calfile['eye.movement']['llim'], 16), \
-                                    int(self.calfile['eye.movement']['ulim'],  16), \
+                                    max(int(self.calfile['eye.movement']['llim'], 16), self.llimcount), \
+                                    min(int(self.calfile['eye.movement']['ulim'],  16), self.ulimcount), \
                                     int(self.calfile['eye.movement']['maxstep'],  16))
         
+        
+        self.minpulse = float(self.calfile['eyelid.movement']['minpulse'])
+        self.maxpulse = float(self.calfile['eyelid.movement']['maxpulse'])
+        self.llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
+        self.ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10
         self.eye_lid = face_motor(self.pca, int(self.calfile['eyelid.movement']['channel'], 10), \
-                                    int(self.calfile['eyelid.movement']['llim'], 16), \
-                                    int(self.calfile['eyelid.movement']['ulim'],  16), \
+                                    max(int(self.calfile['eyelid.movement']['llim'], 16), self.llimcount), \
+                                    min(int(self.calfile['eyelid.movement']['ulim'],  16), self.ulimcount), \
                                     int(self.calfile['eyelid.movement']['maxstep'],  16))
         
         self.mouth_move = face_motor(self.pca, int(self.calfile['mouth.movement']['channel'], 10), \
