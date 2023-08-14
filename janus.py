@@ -26,32 +26,36 @@ class janus():
         
         self.minpulse = float(self.calfile['eye.movement']['minpulse'])
         self.maxpulse = float(self.calfile['eye.movement']['maxpulse'])
-        self.llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
-        self.ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10
+        self.eye_move_llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
+        self.eye_move_ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10
+        self.eye_move_maxstep = float(self.calfile['eye.movement']['maxstep'])
+        self.slope_eye_move = (self.eye_move_ulimcount - self.eye_move_llimcount) / float(self.calfile['eye.movement']['range'])
+        self.eye_move_uangle = float(self.calfile['eye.movement']['uangle'])
+        self.eye_move_langle = float(self.calfile['eye.movement']['langle'])
         self.eye_move = face_motor(self.pca, int(self.calfile['eye.movement']['channel'], 10), \
-                                    max(int(self.calfile['eye.movement']['llim'], 16), self.llimcount), \
-                                    min(int(self.calfile['eye.movement']['ulim'],  16), self.ulimcount), \
-                                    int(self.calfile['eye.movement']['maxstep'],  16))
+                                    self.eye_move_llimcount, \
+                                    self.eye_move_ulimcount)
         
         
         self.minpulse = float(self.calfile['eyelid.movement']['minpulse'])
         self.maxpulse = float(self.calfile['eyelid.movement']['maxpulse'])
-        self.llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
-        self.ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10
+        self.eyelid_move_llimcount = round(self.maxcount * (self.minpulse / (1/self.freq))) * 0x10
+        self.eyelid_move_ulimcount = round(self.maxcount * (self.maxpulse / (1/self.freq))) * 0x10        
+        self.eyelid_move_maxstep = float(self.calfile['eye.movement']['maxstep'])
+        self.slope_eyelid_move = (self.eyelid_move_ulimcount - self.eyelid_move_llimcount) / float(self.calfile['eyelid.movement']['range'])
+        self.eyelid_move_uangle = float(self.calfile['eyelid.movement']['uangle'])
+        self.eyelid_move_langle = float(self.calfile['eyelid.movement']['langle'])
         self.eye_lid = face_motor(self.pca, int(self.calfile['eyelid.movement']['channel'], 10), \
-                                    max(int(self.calfile['eyelid.movement']['llim'], 16), self.llimcount), \
-                                    min(int(self.calfile['eyelid.movement']['ulim'],  16), self.ulimcount), \
-                                    int(self.calfile['eyelid.movement']['maxstep'],  16))
+                                    self.eyelid_move_llimcount, \
+                                    self.eyelid_move_ulimcount)
         
         self.mouth_move = face_motor(self.pca, int(self.calfile['mouth.movement']['channel'], 10), \
                                     int(self.calfile['mouth.movement']['llim'], 16), \
-                                    int(self.calfile['mouth.movement']['ulim'],  16), \
-                                    int(self.calfile['mouth.movement']['maxstep'],  16))
+                                    int(self.calfile['mouth.movement']['ulim'],  16))
         
         self.head_pivot = face_motor(self.pca, int(self.calfile['head.pivot']['channel'], 10), \
                                     int(self.calfile['head.pivot']['llim'], 16), \
-                                    int(self.calfile['head.pivot']['ulim'],  16), \
-                                    int(self.calfile['head.pivot']['maxstep'],  16))
+                                    int(self.calfile['head.pivot']['ulim'],  16))
         
         self.eye_light = rgb_led_control(self.pca, int(self.calfile['eye.light']['rchannel'], 10), \
                                             int(self.calfile['eye.light']['gchannel'], 10), \
@@ -67,11 +71,11 @@ class janus():
         self.eye_color_b_cmd = 0x0
         
         self.mouth_color_r_cmd = 0x0
-        self.mouth_color_g_cmd = 0x0
+        self.mouth_color_g_cmd = 0xffff
         self.mouth_color_b_cmd = 0x0
         
-        self.eye_pos_cmd = 0x0
-        self.eyelid_pos_cmd = 0x0
+        self.eye_pos_out_count = 0x0
+        self.eyelid_pos_out_count = 0x0
         self.mouth_pos_cmd = 0x0
         self.head_pos_cmd = 0x0
         
@@ -85,11 +89,11 @@ class janus():
         self.mouth_color_g_cmd = g_cmd
         self.mouth_color_b_cmd = b_cmd
         
-    def setEyePosition(self, cmd):
-        self.eye_pos_cmd = cmd
+    def setEyePositionCmd(self, cmd):
+        self.eye_pos_cmd_angle = max(self.eye_move_langle, min(self.eye_move_uangle, cmd))
         
-    def setEyeLidPosition(self, cmd):
-        self.eyelid_pos_cmd = cmd
+    def setEyeLidPositionCmd(self, cmd):
+        self.eyelid_pos_cmd_angle = max(self.eyelid_move_langle, min(self.eyelid_move_uangle, cmd))
         
     def setMouthPosition(self, cmd):
         self.mouth_pos_cmd = cmd
@@ -98,11 +102,19 @@ class janus():
         self.head_pos_cmd = cmd
         
     def update(self):
-        self.eye_move.setCmd(self.eye_pos_cmd)
-        self.eye_lid.setCmd(self.eyelid_pos_cmd)
-        self.mouth_move.setCmd(self.mouth_pos_cmd)
-        self.head_pivot.setCmd(self.head_pos_cmd)
+        self.eye_pos_cmd_count = round((self.eye_pos_cmd_angle * self.slope_eye_move) + self.eye_move_llimcount)
+        self.eye_pos_err = round(self.eye_pos_cmd_count - self.eye_pos_out_count)
+        self.eye_pos_step = max(-self.eye_move_maxstep, min(self.eye_move_maxstep, self.eye_pos_err))
+        self.eye_pos_out_count = self.eye_pos_out_count + self.eye_pos_step
+        self.eye_move.setCmd(self.eye_pos_cmd_count)
+        print(str(self.eye_pos_cmd_count) + " " + str(self.eye_pos_out_count) + " " + str(self.eye_pos_err))
         
+        self.eyelid_pos_cmd_count = round((self.eyelid_pos_cmd_angle * self.slope_eyelid_move) + self.eyelid_move_llimcount)
+        self.eyelid_pos_err = self.eyelid_pos_cmd_count - self.eyelid_pos_out_count
+        self.eyelid_pos_step = max(-self.eyelid_move_maxstep, min(self.eyelid_move_maxstep, self.eyelid_pos_err))
+        self.eyelid_pos_out_count = self.eyelid_pos_out_count + self.eyelid_pos_step
+        self.eye_lid.setCmd(self.eyelid_pos_out_count)
+                
         self.eye_light.setCmd(self.eye_color_r_cmd, self.eye_color_g_cmd, self.eye_color_b_cmd)
         self.mouth_light.setCmd(self.mouth_color_r_cmd, self.mouth_color_g_cmd, self.mouth_color_b_cmd)
         

@@ -29,3 +29,6 @@ class rgb_led_control():
 		self.pca.channels[self.bchannel].duty_cycle = self.boutput
 		
 		# print(str(self.routput) + " " + str(self.goutput) + " " + str(self.boutput))
+		
+	def getOutput(self):
+	    return [self.routput, self.goutput, self.boutput]
