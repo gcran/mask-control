@@ -12,17 +12,9 @@ class rgb_led_control():
 		self.boutput = 0xFFFF
 		
 	def setCmd(self, rcmd, gcmd, bcmd):
-		self.rerr = rcmd - self.routput
-		self.gerr = gcmd - self.goutput
-		self.berr = bcmd - self.boutput
-		
-		self.rstep = max(-self.maxstep, min(self.maxstep, self.rerr))
-		self.gstep = max(-self.maxstep, min(self.maxstep, self.gerr))
-		self.bstep = max(-self.maxstep, min(self.maxstep, self.berr))
-		
-		self.routput = max(self.llim, min(self.ulim, self.routput + self.rstep))
-		self.goutput = max(self.llim, min(self.ulim, self.goutput + self.gstep))
-		self.boutput = max(self.llim, min(self.ulim, self.boutput + self.bstep))
+		self.routput = rcmd
+		self.goutput = gcmd
+		self.boutput = bcmd
 		
 		self.pca.channels[self.rchannel].duty_cycle = self.routput
 		self.pca.channels[self.gchannel].duty_cycle = self.goutput

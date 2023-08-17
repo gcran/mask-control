@@ -47,23 +47,26 @@ class bot_control(tk.Frame):
     def eyeMoveSliderCallback(self, cmd):
         self.robot.setEyePositionCmd(self.eyepos.get())
         
-    def eyeBlinkSliderCallback(self, cmd):
+    def eyeLidSliderCallback(self, cmd):
         self.robot.setEyeLidPositionCmd(self.eyelidpos.get())
         
     def mouthMoveSliderCallback(self, cmd):
-        self.robot.setMouthPosition(self.mouthpos.get())
+        self.robot.setMouthPositionCmd(self.mouthpos.get())
         
-    def headRotateSliderCallback(self, cmd):
-        self.robot.setHeadPosition(self.eyepos.get())
+    def headYawSliderCallback(self, cmd):
+        self.robot.setHeadYawPositionCmd(self.head_yawpos.get())
+        
+    def headRollSliderCallback(self, cmd):
+        self.robot.setHeadRollPositionCmd(self.head_rollpos.get())
         
     def eyeColorCallback(self):
-        if (self.eyecolor.get() == 9):
+        if (self.eyecolor.get() == 0):
             self.robot.setEyeColor(self.robot.eye_light.llim, self.robot.eye_light.ulim, self.robot.eye_light.llim)
         else:
             self.robot.setEyeColor(self.robot.eye_light.ulim, self.robot.eye_light.llim, self.robot.eye_light.llim)
         
     def mouthColorUpdate(self):
-        self.robot.ssetEyeColor(r_cmd, g_cmd, b_cmd)
+        self.robot.setEyeColor(r_cmd, g_cmd, b_cmd)
         
     def createWidgets(self):
         # eye position slider
@@ -77,20 +80,37 @@ class bot_control(tk.Frame):
         # eyelid position slider
         self.eyelidpos = tk.DoubleVar()
         self.eyelidpos.set(self.POS_MAX)
-        self.eyelidposscale = tk.Scale(self.master,label="Eyelid Position", orient=tk.VERTICAL, from_=self.robot.eyelid_move_langle, to=self.robot.eyelid_move_uangle, variable=self.eyelidpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeBlinkSliderCallback)
+        self.eyelidposscale = tk.Scale(self.master,label="Eyelid Position", orient=tk.VERTICAL, from_=self.robot.eyelid_move_langle, to=self.robot.eyelid_move_uangle, variable=self.eyelidpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeLidSliderCallback)
         self.eyelidposscale.grid(column=0, row=0, padx=10, pady=10)
         self.eyelidpos.set((self.robot.eyelid_move_uangle + self.robot.eyelid_move_langle) / 2)
         self.robot.setEyeLidPositionCmd(self.eyelidpos.get())
         
         # mouth position slider
-        self.mouthpos = tk.IntVar()
-        self.mouthpos.set(self.POS_MIN)
-        self.mouthposscale = tk.Scale(self.master,label="Mouth Position", orient=tk.VERTICAL, from_=self.POS_MIN, to=self.POS_MAX, variable=self.mouthpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.mouthMoveSliderCallback)
+        self.mouthpos = tk.DoubleVar()
+        self.mouthpos.set(self.POS_MAX)
+        self.mouthposscale = tk.Scale(self.master,label="Mouth Position", orient=tk.VERTICAL, from_=self.robot.mouth_move_langle, to=self.robot.mouth_move_uangle, variable=self.mouthpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.mouthMoveSliderCallback)
         self.mouthposscale.grid(column=1, row=0, padx=10, pady=10)
+        self.mouthpos.set((self.robot.mouth_move_uangle + self.robot.mouth_move_langle) / 2)
+        self.robot.setMouthPositionCmd(self.mouthpos.get())
         
+        # head yaw position slider
+        self.head_yawpos = tk.DoubleVar()
+        self.head_yawpos.set(self.POS_MAX)
+        self.head_yawposscale = tk.Scale(self.master,label="head Yaw Position", orient=tk.VERTICAL, from_=self.robot.head_yaw_move_langle, to=self.robot.head_yaw_move_uangle, variable=self.head_yawpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.headYawSliderCallback)
+        self.head_yawposscale.grid(column=2, row=0, padx=10, pady=10)
+        self.head_yawpos.set((self.robot.head_yaw_move_uangle + self.robot.head_yaw_move_langle) / 2)
+        self.robot.setHeadYawPositionCmd(self.head_yawpos.get())
+        
+        # head Roll position slider
+        self.head_rollpos = tk.DoubleVar()
+        self.head_rollpos.set(self.POS_MAX)
+        self.head_rollposscale = tk.Scale(self.master,label="Head Roll Position", orient=tk.VERTICAL, from_=self.robot.head_roll_move_langle, to=self.robot.head_roll_move_uangle, variable=self.head_rollpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.headRollSliderCallback)
+        self.head_rollposscale.grid(column=3, row=0, padx=10, pady=10)
+        self.head_rollpos.set((self.robot.head_roll_move_uangle + self.robot.head_roll_move_langle) / 2)
+        self.robot.setHeadRollPositionCmd(self.head_rollpos.get())
         
         self.eyeColorFrame = tk.LabelFrame(self.master, bd=1, text="Eye Color", padx=10, pady=10)
-        self.eyeColorFrame.grid(column=2, row=0)
+        self.eyeColorFrame.grid(column=4, row=0)
         self.eyecolor = tk.IntVar()
         self.eyesel1 = tk.Radiobutton(self.eyeColorFrame, text="Good",value="0", variable=self.eyecolor, command=self.eyeColorCallback)
         self.eyesel2 = tk.Radiobutton(self.eyeColorFrame, text="Evil",value="1", variable=self.eyecolor, command=self.eyeColorCallback)
@@ -98,6 +118,7 @@ class bot_control(tk.Frame):
         self.eyesel2.grid(column=0,row=1, sticky=tk.W)
         self.eyesel1.select()
         self.eyesel2.deselect()
+        self.robot.setEyeColor(self.robot.eye_light.llim, self.robot.eye_light.ulim, self.robot.eye_light.llim)
         
         self.SoundboardFrame = tk.LabelFrame(self.master, bd=1, text="Soundboard")
         self.SoundboardFrame.grid(column=0, row=2, columnspan=3)

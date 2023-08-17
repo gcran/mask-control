@@ -14,7 +14,7 @@ class face_motor():
 	def setCmd(self, cmd):
 		# self.err = cmd - self.output
 		# self.step = max(-self.maxstep, min(self.maxstep, self.err))
-		self.output = max(self.llim, min(self.ulim, cmd))			
+		self.output = round(max(self.llim, min(self.ulim, cmd)))
 		self.pca.channels[self.channel].duty_cycle = self.output
 		
 		# print(str(cmd))
