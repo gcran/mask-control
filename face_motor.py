@@ -15,6 +15,7 @@ class face_motor():
 
         self.init_angle = int(params['init'], 10)
         self.setCmd(self.init_angle)
+        self.out_count = self.cmd_count
 
     def setCmd(self, cmd):
         self.cmd_count = round(self.angle2count * max(self.llim_angle, min(self.ulim_angle, cmd)) + self.min_count)
@@ -29,7 +30,7 @@ class face_motor():
         self.pca.channels[self.channel].duty_cycle = self.out_count
 
     def getCmd(self):
-        return self.output
+        return self.out_count
 
     def getOutput(self):
         return self.out_count

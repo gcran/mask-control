@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import tkinter as tk
 import janus
+import contextlib
 with contextlib.redirect_stdout(None):
     from pygame import mixer
 
@@ -32,16 +33,16 @@ class bot_control(tk.Frame):
         self.ixer.stop()
         self.button2sound.play(self)
         
-    def eyeSliderCallback(self):
-        self.robot.setMotorCmd('eyes', self.eyepos.get())
+    def eyeSliderCallback(self, cmd):
+        self.robot.setMotorCmd('eyes', self.eye_pos.get())
         
-    def eyelidSliderCallback(self):
+    def eyelidSliderCallback(self, cmd):
         self.robot.setMotorCmd('eyelids', self.eyelid_pos.get())
         
-    def mouthSliderCallback(self):
+    def mouthSliderCallback(self, cmd):
         self.robot.setMotorCmd('mouth', self.mouth_pos.get())
         
-    def headYawSliderCallback(self):
+    def headYawSliderCallback(self, cmd):
         self.robot.setMotorCmd('head_yaw', self.head_yaw_pos.get())
         
     def personalityCallback(self):
@@ -53,7 +54,7 @@ class bot_control(tk.Frame):
         self.head_yaw_pos.set(self.robot.motors['head_yaw'].init_angle)
         self.head_yaw_scale = tk.Scale(self.master,label="Head Yaw", orient=tk.HORIZONTAL, from_=self.robot.motors['head_yaw'].llim_angle,
                                     to=self.robot.motors['head_yaw'].ulim_angle, variable=self.head_yaw_pos, length=self.H_SCALE_LEN,
-                                    resolution=self.POS_RESOLUTION, command=self.headYawSliderCallback)
+                                    resolution=self.SCALE_RES, command=self.headYawSliderCallback)
         self.head_yaw_scale.grid(column=2, row=0, padx=10, pady=10, columnspan=3)
         
         # eye position slider
@@ -61,7 +62,7 @@ class bot_control(tk.Frame):
         self.eye_pos.set(self.robot.motors['eyes'].init_angle)
         self.eye_pos_scale = tk.Scale(self.master,label="Eye Position", orient=tk.HORIZONTAL, from_=self.robot.motors['eyes'].llim_angle,
                                     to=self.robot.motors['eyes'].ulim_angle, variable=self.eye_pos, length=self.H_SCALE_LEN,
-                                    resolution=self.POS_RESOLUTION, command=self.eyeSliderCallback)
+                                    resolution=self.SCALE_RES, command=self.eyeSliderCallback)
         self.eye_pos_scale.grid(column=2, row=1, padx=10, pady=10, columnspan=3)
         
         # eyelid position slider
@@ -69,7 +70,7 @@ class bot_control(tk.Frame):
         self.eyelid_pos.set(self.robot.motors['eyelids'].init_angle)
         self.eyelid_pos_scale = tk.Scale(self.master,label="Eyelids", orient=tk.VERTICAL, from_=self.robot.motors['eyelids'].llim_angle,
                                     to=self.robot.motors['eyelids'].ulim_angle, variable=self.eyelid_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.POS_RESOLUTION, command=self.eyelidSliderCallback)
+                                    resolution=self.SCALE_RES, command=self.eyelidSliderCallback)
         self.eyelid_pos_scale.grid(column=0, row=0, padx=10, pady=10, rowspan=2)
         
         # mouth position slider
@@ -77,7 +78,7 @@ class bot_control(tk.Frame):
         self.mouth_pos.set(self.robot.motors['mouth'].init_angle)
         self.mouth_pos_scale = tk.Scale(self.master,label="Mouth", orient=tk.VERTICAL, from_=self.robot.motors['mouth'].llim_angle,
                                     to=self.robot.motors['mouth'].ulim_angle, variable=self.mouth_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.POS_RESOLUTION, command=self.mouthSliderCallback)
+                                    resolution=self.SCALE_RES, command=self.mouthSliderCallback)
         self.mouth_pos_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=2)
         
         # personality selector

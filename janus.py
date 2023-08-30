@@ -28,17 +28,18 @@ class janus():
         self.motors = dict()
         for i in ['eyes', 'eyelids', 'mouth', 'head_roll', 'head_yaw']:
             self.params = self.calfile[i + '.movement']
-            self.params.update(calfile['motor.' + self.params['type']])
-            self.params['pwm_period'] = self.pwm_period
+            self.params.update(self.calfile['motor.' + self.params['type']])
+            self.params['pwm_period'] = self.calfile['general']['pwm_period']
+            
             self.motors[i] = face_motor(self.pca, self.params)
-        
+     
         # create light dictionary
         self.LIGHT_MIN = 0
         self.LIGHT_MAX = 0xFFFF
         self.lights = dict()
         for i in ['left_eye', 'right_eye', 'mouth']:
             self.params = self.calfile[i + '.light']
-            self.params['pwm_period'] = self.pwm_period
+            self.params['pwm_period'] = self.calfile['general']['pwm_period']
             self.lights[i] = rgb_led_control(self.pca, self.params)
             
         # initialize personality mode
@@ -72,10 +73,10 @@ class janus():
     def update_fcn(self):
         while(True):
             for i in self.motors:
-                i.update()
-                
+                self.motors[i].update()
+                # print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
             for i in self.lights:
-                i.update()
+                self.lights[i].update()
                 
             time.sleep(self.update_period)
 
