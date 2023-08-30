@@ -1,24 +1,39 @@
 class face_motor():
-	"""Class for a servo in the robot face.
-	   Set ulim, lli, and slew from calibration file.
-	   Assumes a speed of 60 degrees/150 ms."""
-	def __init__(self, pca, channel, llim, ulim):
-		self.pca = pca
-		self.channel = channel
-		self.ulim = min(ulim, 0x0FFFF)
-		self.llim = max(llim, 0)
-		self.output = round((self.ulim + self.llim) / 2)
-		self.pca.channels[self.channel].duty_cycle = self.output
-		# print(str(self.llim) + " " + str(self.ulim))
-		
-	def setCmd(self, cmd):
-		# self.err = cmd - self.output
-		# self.step = max(-self.maxstep, min(self.maxstep, self.err))
-		self.output = round(max(self.llim, min(self.ulim, cmd)))
-		self.pca.channels[self.channel].duty_cycle = self.output
-		
-		# print(str(cmd))
-		
-	def getPos(self):
-		return self.output	
+    """Class for a servo in the robot face."""
+    def __init__(self, pca, params):
+        self.pca = pca
+        self.channel = int(params['channel'], 10)
+        self.llim_angle = int(params['llim_angle'], 10)
+        self.ulim_angle = int(params['ulim_angle'], 10)
+        self.period = float(params['pwm_period'])
+        self.fsr = 0xFFFF
+        self.min_count = round((float(params['min_pulse']) / self.period) * self.fsr)
+        self.max_count = round((float(params['max_pulse']) / self.period) * self.fsr)
+        self.angle2count = (self.max_count - self.min_count) / int(params['range'], 10)
+
+        self.max_step_count = round(int(params['maxstep'], 10) * self.angle2count)
+
+        self.init_angle = int(params['init'], 10)
+        self.setCmd(self.init_angle)
+
+    def setCmd(self, cmd):
+        self.cmd_count = round(self.angle2count * max(self.llim_angle, min(self.ulim_angle, cmd)) + self.min_count)
+
+    def update(self):
+        self.err = self.cmd_count - self.out_count
+        if (self.err > 0):
+            self.out_count = self.out_count + min(self.max_step_count, self.err)
+        else:
+            self.out_count = self.out_count + max(-self.max_step_count, self.err)
+
+        self.pca.channels[self.channel].duty_cycle = self.out_count
+
+    def getCmd(self):
+        return self.output
+
+    def getOutput(self):
+        return self.out_count
+
+    def getErr(self):
+        return self.err
 
