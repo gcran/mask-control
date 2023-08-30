@@ -3,9 +3,11 @@ import rgb_led_control
 from board import SCL, SDA
 import busio
 from adafruit_pca9685 import PCA9685
-import configparser, time, threading
+import os, configparser, time, threading, contextlib
 from face_motor import *
 from rgb_led_control import *
+with contextlib.redirect_stdout(None):
+    from pygame import mixer
 
 class janus():
     def __init__(self, filename):
@@ -21,16 +23,12 @@ class janus():
         self.update_period = float(self.calfile['general']['update_period'])
         self.pca.frequency = round(1/self.pwm_period)
         
-        #initialize devices
-        self.maxcount = 0xfff
-        
         # create motor dictionary
         self.motors = dict()
         for i in ['eyes', 'eyelids', 'mouth', 'head_roll', 'head_yaw']:
             self.params = self.calfile[i + '.movement']
             self.params.update(self.calfile['motor.' + self.params['type']])
-            self.params['pwm_period'] = self.calfile['general']['pwm_period']
-            
+            self.params['pwm_period'] = self.calfile['general']['pwm_period']            
             self.motors[i] = face_motor(self.pca, self.params)
      
         # create light dictionary
@@ -47,6 +45,12 @@ class janus():
         self.EVIL = 1
         
         self.personality = self.GOOD        
+        
+        # create sound dictionary
+        mixer.init()
+        self.sounds = dict()
+        for i in list(self.calfile['sounds']):
+            self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
     
         # initialize output thread
         self.output_thread = threading.Thread(target = self.update_fcn, daemon = True)
@@ -69,6 +73,11 @@ class janus():
     
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
+    
+    def playSound(self, sound):
+        if sound in self.sounds:
+            mixer.stop()
+            self.sounds[sound].play()
         
     def update_fcn(self):
         while(True):
