@@ -1,33 +1,22 @@
 #!/usr/bin/python
 import tkinter as tk
-from board import SCL, SDA
-import busio
 import janus
-# Import the PCA9685 module.
-from adafruit_pca9685 import PCA9685
-
-UPDATE_PERIOD = 20 #MS
+import contextlib
+with contextlib.redirect_stdout(None):
+    from pygame import mixer
 
 class bot_control(tk.Frame):
     def __init__(self, robot, master=None):
         tk.Frame.__init__(self, master)
         self.master.title("J4N-U5 Control Panel")
-        self.POS_MIN = 0x0
-        self.POS_MAX = 0xFFFF
-        self.POS_RESOLUTION = 0x10
+        self.SCALE_RES = 0.1
         self.H_SCALE_LEN = 500
         self.V_SCALE_LEN = 200
-        self.SCALE_INTERVAL = 45
         
         self.robot = robot
         
         self.createWidgets()
-        self.master.after(0, self.setOutput)
-        
-    def setOutput(self):
-        self.robot.update()                
-        # self.master.after(self.robot.getRate(), self.setOutput)
-        
+                
     def button1Callback(self):
         self.mixer.stop()
         self.button1sound.play()
@@ -44,55 +33,64 @@ class bot_control(tk.Frame):
         self.ixer.stop()
         self.button2sound.play(self)
         
-    def eyeMoveSliderCallback(self, cmd):
-        self.robot.setEyePosition(self.eyepos.get())
-        self.robot.update()  
+    def eyeSliderCallback(self, cmd):
+        self.robot.setMotorCmd('eyes', self.eye_pos.get())
         
-    def eyeBlinkSliderCallback(self, cmd):
-        self.robot.setEyeLidPosition(self.eyelidpos.get())
-        self.robot.update()  
+    def eyelidSliderCallback(self, cmd):
+        self.robot.setMotorCmd('eyelids', self.eyelid_pos.get())
         
-    def mouthMoveSliderCallback(self, cmd):
-        self.robot.setMouthPosition(self.mouthpos.get())
+    def mouthSliderCallback(self, cmd):
+        self.robot.setMotorCmd('mouth', self.mouth_pos.get())
         
-    def headRotateSliderCallback(self, cmd):
-        self.robot.setHeadPosition(self.eyepos.get())
+    def headYawSliderCallback(self, cmd):
+        self.robot.setMotorCmd('head_yaw', self.head_yaw_pos.get())
         
-    def eyeColorCallback(self):
-        self.robot.setHeadPosition(r_cmd, g_cmd, b_cmd)
-        
-    def mouthColorUpdate(self):
-        self.robot.ssetEyeColor(r_cmd, g_cmd, b_cmd)
+    def personalityCallback(self):
+        self.robot.setPersonality(self.personality.get())
         
     def createWidgets(self):
+        # head yaw position slider
+        self.head_yaw_pos = tk.DoubleVar()
+        self.head_yaw_pos.set(self.robot.motors['head_yaw'].init_angle)
+        self.head_yaw_scale = tk.Scale(self.master,label="Head Yaw", orient=tk.HORIZONTAL, from_=self.robot.motors['head_yaw'].llim_angle,
+                                    to=self.robot.motors['head_yaw'].ulim_angle, variable=self.head_yaw_pos, length=self.H_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.headYawSliderCallback)
+        self.head_yaw_scale.grid(column=2, row=0, padx=10, pady=10, columnspan=3)
+        
         # eye position slider
-        self.eyepos = tk.IntVar()
-        self.eyepos.set(round((self.POS_MAX - self.POS_MIN) / 2))
-        self.eyeposscale = tk.Scale(self.master,label="Eye Position", orient=tk.HORIZONTAL, from_=self.robot.eye_move.llim, to=self.robot.eye_move.ulim, variable=self.eyepos, length=self.H_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeMoveSliderCallback)
-        self.eyeposscale.grid(column=0, row=1, padx=10, pady=10, columnspan=3)
+        self.eye_pos = tk.DoubleVar()
+        self.eye_pos.set(self.robot.motors['eyes'].init_angle)
+        self.eye_pos_scale = tk.Scale(self.master,label="Eye Position", orient=tk.HORIZONTAL, from_=self.robot.motors['eyes'].llim_angle,
+                                    to=self.robot.motors['eyes'].ulim_angle, variable=self.eye_pos, length=self.H_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.eyeSliderCallback)
+        self.eye_pos_scale.grid(column=2, row=1, padx=10, pady=10, columnspan=3)
         
         # eyelid position slider
-        self.eyelidpos = tk.IntVar()
-        self.eyelidpos.set(self.POS_MAX)
-        self.eyelidposscale = tk.Scale(self.master,label="Eyelid Position", orient=tk.VERTICAL, from_=self.robot.eye_lid.llim, to=self.robot.eye_lid.ulim, variable=self.eyelidpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.eyeBlinkSliderCallback)
-        self.eyelidposscale.grid(column=0, row=0, padx=10, pady=10)
+        self.eyelid_pos = tk.DoubleVar()
+        self.eyelid_pos.set(self.robot.motors['eyelids'].init_angle)
+        self.eyelid_pos_scale = tk.Scale(self.master,label="Eyelids", orient=tk.VERTICAL, from_=self.robot.motors['eyelids'].llim_angle,
+                                    to=self.robot.motors['eyelids'].ulim_angle, variable=self.eyelid_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.eyelidSliderCallback)
+        self.eyelid_pos_scale.grid(column=0, row=0, padx=10, pady=10, rowspan=2)
         
         # mouth position slider
-        self.mouthpos = tk.IntVar()
-        self.mouthpos.set(self.POS_MIN)
-        self.mouthposscale = tk.Scale(self.master,label="Mouth Position", orient=tk.VERTICAL, from_=self.POS_MIN, to=self.POS_MAX, variable=self.mouthpos, length=self.V_SCALE_LEN, resolution=self.POS_RESOLUTION, command=self.mouthMoveSliderCallback)
-        self.mouthposscale.grid(column=1, row=0, padx=10, pady=10)
+        self.mouth_pos = tk.DoubleVar()
+        self.mouth_pos.set(self.robot.motors['mouth'].init_angle)
+        self.mouth_pos_scale = tk.Scale(self.master,label="Mouth", orient=tk.VERTICAL, from_=self.robot.motors['mouth'].llim_angle,
+                                    to=self.robot.motors['mouth'].ulim_angle, variable=self.mouth_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.mouthSliderCallback)
+        self.mouth_pos_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=2)
         
-        
-        self.eyeColorFrame = tk.LabelFrame(self.master, bd=1, text="Eye Color", padx=10, pady=10)
-        self.eyeColorFrame.grid(column=2, row=0)
-        self.eyecolor = tk.IntVar()
-        self.eyesel1 = tk.Radiobutton(self.eyeColorFrame, text="Good",value="0", variable=self.eyecolor)
-        self.eyesel2 = tk.Radiobutton(self.eyeColorFrame, text="Evil",value="1", variable=self.eyecolor)
-        self.eyesel1.grid(column=0,row=0, sticky=tk.W)
-        self.eyesel2.grid(column=0,row=1, sticky=tk.W)
-        self.eyesel1.select()
-        self.eyesel2.deselect()
+        # personality selector
+        self.personalityFrame = tk.LabelFrame(self.master, bd=1, text="Personality", padx=10, pady=10)
+        self.personalityFrame.grid(column=6, row=0)
+        self.personality = tk.IntVar()
+        self.personalitysel1 = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD, variable=self.personality, command=self.personalityCallback)
+        self.personalitysel2 = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL, variable=self.personality, command=self.personalityCallback)
+        self.personalitysel1.grid(column=0,row=0, sticky=tk.W)
+        self.personalitysel2.grid(column=0,row=1, sticky=tk.W)
+        self.personalitysel1.select()
+        self.personalitysel2.deselect()
         
         self.SoundboardFrame = tk.LabelFrame(self.master, bd=1, text="Soundboard")
         self.SoundboardFrame.grid(column=0, row=2, columnspan=3)
@@ -109,7 +107,8 @@ class bot_control(tk.Frame):
         self.button4 = tk.Button(self.SoundboardFrame,text="Sound 4", padx=10, pady=10, command=self.button4Callback)
         self.button4.grid(column=3,row=0, padx=10, pady=10)
     
-robot = janus.janus('calibration.ini')
-window = bot_control(robot)
-window.mainloop()
+if __name__ == '__main__':
+    robot = janus.janus('calibration.ini')
+    window = bot_control(robot)
+    window.mainloop()
 
