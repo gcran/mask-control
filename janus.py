@@ -75,6 +75,7 @@ class janus():
         self.motors[motor].setCmd(cmd)
     
     def playSound(self, sound):
+        print(sound)
         if sound in self.sounds:
             mixer.stop()
             self.sounds[sound].play()

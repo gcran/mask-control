@@ -15,6 +15,7 @@ class face_motor():
         self.max_step_count = round(self.max_step_angle * self.angle2count)
 
         self.init_angle = int(params['init'], 10)
+        self.err = 0
         self.setCmd(self.init_angle)
         self.out_count = self.cmd_count
 
