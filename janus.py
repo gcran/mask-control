@@ -44,7 +44,7 @@ class janus():
         self.GOOD = 0
         self.EVIL = 1
         
-        self.personality = self.GOOD        
+        self.setPersonality(self.GOOD)
         
         # create sound dictionary
         mixer.init()
@@ -53,6 +53,7 @@ class janus():
             self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
     
         # initialize output thread
+        self.prev_time = time.time_ns()
         self.output_thread = threading.Thread(target = self.update_fcn, daemon = True)
         self.output_thread.start()
         
@@ -75,20 +76,26 @@ class janus():
         self.motors[motor].setCmd(cmd)
     
     def playSound(self, sound):
-        print(sound)
         if sound in self.sounds:
             mixer.stop()
             self.sounds[sound].play()
         
     def update_fcn(self):
         while(True):
-            for i in self.motors:
-                self.motors[i].update()
-                # print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
-            for i in self.lights:
-                self.lights[i].update()
+            self.c_time = time.time_ns()
+            if (((self.c_time - self.prev_time) * 1e-9) >= self.update_period):
+                self.prev_time = self.c_time
+                if mixer.get_busy():
+                    self.blink = True
                 
-            time.sleep(self.update_period)
+                for i in self.motors:
+                    self.motors[i].update(True)
+                    # print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
+                for i in self.lights:
+                    self.lights[i].update()
+                    print(self.lights[i].getOut())                
+                
 
-if __name__ == '__main__':
+if (__name__ == '__main__'):
     pass
+
