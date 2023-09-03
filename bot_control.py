@@ -73,8 +73,10 @@ class bot_control(tk.Frame):
         self.personalityFrame = tk.LabelFrame(self.master, bd=1, text="Personality", padx=10, pady=10)
         self.personalityFrame.grid(column=6, row=0)
         self.personality = tk.IntVar()
-        self.personalitysel1 = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD, variable=self.personality, command=self.personalityCallback)
-        self.personalitysel2 = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL, variable=self.personality, command=self.personalityCallback)
+        self.personalitysel1 = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD,
+                                                variable=self.personality, command=self.personalityCallback)
+        self.personalitysel2 = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
+                                                variable=self.personality, command=self.personalityCallback)
         self.personalitysel1.grid(column=0,row=0, sticky=tk.W)
         self.personalitysel2.grid(column=0,row=1, sticky=tk.W)
         self.personalitysel1.select()
@@ -91,7 +93,7 @@ class bot_control(tk.Frame):
             self.j = self.j + 1
     
 if __name__ == '__main__':
-    robot = janus.janus('calibration.ini')
+    robot = janus.janus('calibration.ini', test=False)
     window = bot_control(robot)
     window.mainloop()
 

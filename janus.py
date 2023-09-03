@@ -10,10 +10,11 @@ with contextlib.redirect_stdout(None):
     from pygame import mixer
 
 class janus():
-    def __init__(self, filename):
+    def __init__(self, filename, test=False):
         # initialize i2c bus and PCA9685 Module
         self.i2c_bus = busio.I2C(SCL, SDA)
         self.pca = PCA9685(self.i2c_bus)
+        self.test_mode = test
         
         # load calibration file
         self.calfile = configparser.ConfigParser()
@@ -37,21 +38,23 @@ class janus():
         self.lights = dict()
         for i in ['left_eye', 'right_eye', 'mouth']:
             self.params = self.calfile[i + '.light']
-            self.params['pwm_period'] = self.calfile['general']['pwm_period']
+            self.params['update_period'] = self.calfile['general']['update_period']            
+            self.params['color_crossfade'] = self.calfile['general']['color_crossfade']
             self.lights[i] = rgb_led_control(self.pca, self.params)
             
         # initialize personality mode
         self.GOOD = 0
         self.EVIL = 1
         
-        self.setPersonality(self.GOOD)
+        if not self.test_mode:
+            self.setPersonality(self.GOOD)
         
         # create sound dictionary
         mixer.init()
         self.sounds = dict()
         for i in list(self.calfile['sounds']):
             self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
-    
+        
         # initialize output thread
         self.prev_time = time.time_ns()
         self.output_thread = threading.Thread(target = self.update_fcn, daemon = True)
@@ -74,27 +77,42 @@ class janus():
     
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
+        
+    def setLightCmd(self, cmd):
+        for i in self.lights:
+            self.lights[i].setCmd(cmd[0], cmd[1], cmd[2])
+            
+    def setCrossfadeRate(self, rate):
+        for i in self.lights:
+            self.lights[i].setRate(rate)
     
     def playSound(self, sound):
         if sound in self.sounds:
             mixer.stop()
             self.sounds[sound].play()
+            if(self.test_mode):
+                print(sound)
         
     def update_fcn(self):
         while(True):
             self.c_time = time.time_ns()
-            if (((self.c_time - self.prev_time) * 1e-9) >= self.update_period):
+            self.e_time = (self.c_time - self.prev_time) * 1e-9
+            if (self.e_time >= self.update_period):
                 self.prev_time = self.c_time
                 if mixer.get_busy():
                     self.blink = True
                 
                 for i in self.motors:
-                    self.motors[i].update(True)
-                    # print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
+                    self.motors[i].update(self.e_time)
+                    if(self.test_mode):
+                        print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
                 for i in self.lights:
-                    self.lights[i].update()
-                    print(self.lights[i].getOut())                
+                    self.lights[i].update(self.e_time)
+                    if(self.test_mode):
+                        print(self.lights[i].getOut())                
                 
+                if(self.test_mode):
+                    print(self.e_time)
 
 if (__name__ == '__main__'):
     pass
