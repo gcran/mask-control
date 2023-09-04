@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import tkinter as tk
 import janus
+from functools import partial
 import contextlib
 with contextlib.redirect_stdout(None):
     from pygame import mixer
@@ -17,21 +18,8 @@ class bot_control(tk.Frame):
         
         self.createWidgets()
                 
-    def button1Callback(self):
-        self.mixer.stop()
-        self.button1sound.play()
-
-    def button2Callback(self):
-        self.mixer.stop()
-        self.button2sound.play()
-
-    def button3Callback(self):
-        self.mixer.stop()
-        self.button2sound.play(self)    
-
-    def button4Callback(self):
-        self.ixer.stop()
-        self.button2sound.play(self)
+    def soundboardCallback(self, sound):
+        self.robot.playSound(sound)
         
     def eyeSliderCallback(self, cmd):
         self.robot.setMotorCmd('eyes', self.eye_pos.get())
@@ -85,8 +73,10 @@ class bot_control(tk.Frame):
         self.personalityFrame = tk.LabelFrame(self.master, bd=1, text="Personality", padx=10, pady=10)
         self.personalityFrame.grid(column=6, row=0)
         self.personality = tk.IntVar()
-        self.personalitysel1 = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD, variable=self.personality, command=self.personalityCallback)
-        self.personalitysel2 = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL, variable=self.personality, command=self.personalityCallback)
+        self.personalitysel1 = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD,
+                                                variable=self.personality, command=self.personalityCallback)
+        self.personalitysel2 = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
+                                                variable=self.personality, command=self.personalityCallback)
         self.personalitysel1.grid(column=0,row=0, sticky=tk.W)
         self.personalitysel2.grid(column=0,row=1, sticky=tk.W)
         self.personalitysel1.select()
@@ -95,20 +85,15 @@ class bot_control(tk.Frame):
         self.SoundboardFrame = tk.LabelFrame(self.master, bd=1, text="Soundboard")
         self.SoundboardFrame.grid(column=0, row=2, columnspan=3)
         
-        self.button1 = tk.Button(self.SoundboardFrame,text="Sound 1", padx=10, pady=10, command=self.button1Callback)
-        self.button1.grid(column=0,row=0, padx=10, pady=10)
-        
-        self.button2 = tk.Button(self.SoundboardFrame,text="Sound 2", padx=10, pady=10, command=self.button2Callback)
-        self.button2.grid(column=1,row=0, padx=10, pady=10)
-        
-        self.button3 = tk.Button(self.SoundboardFrame,text="Sound 3", padx=10, pady=10, command=self.button3Callback)
-        self.button3.grid(column=2,row=0, padx=10, pady=10)
-        
-        self.button4 = tk.Button(self.SoundboardFrame,text="Sound 4", padx=10, pady=10, command=self.button4Callback)
-        self.button4.grid(column=3,row=0, padx=10, pady=10)
+        self.j = 0
+        self.sound_buttons = []
+        for i in list(self.robot.sounds):
+            self.sound_buttons.append(tk.Button(self.SoundboardFrame,text=i, padx=10, pady=10, command=partial(self.soundboardCallback, sound=i)))
+            self.sound_buttons[self.j].grid(column=self.j, row=0, padx=10, pady=10)
+            self.j = self.j + 1
     
 if __name__ == '__main__':
-    robot = janus.janus('calibration.ini')
+    robot = janus.janus('calibration.ini', test=False)
     window = bot_control(robot)
     window.mainloop()
 
