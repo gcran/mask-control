@@ -50,8 +50,8 @@ class cal_panel(tk.Frame):
         # eyelid rate slider
         self.eyelid_rate = tk.DoubleVar()
         self.eyelid_rate.set(self.robot.motors['eyelids'].rate)
-        self.eyelid_rate_scale = tk.Scale(self.eyelid_frame,label="Eyelid Rate", orient=tk.VERTICAL, from_=0,
-                                    to=360, variable=self.eyelid_rate, length=self.V_SCALE_LEN,
+        self.eyelid_rate_scale = tk.Scale(self.eyelid_frame,label="Eyelid Rate", orient=tk.VERTICAL, from_=360,
+                                    to=0, variable=self.eyelid_rate, length=self.V_SCALE_LEN,
                                     resolution=1, command=partial(self.motorRateSliderCallback, motor='eyelids'))
         self.eyelid_rate_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=3)
         
@@ -72,8 +72,8 @@ class cal_panel(tk.Frame):
         # mouth Rate slider
         self.mouth_rate = tk.DoubleVar()
         self.mouth_rate.set(self.robot.motors['mouth'].rate)
-        self.mouth_rate_scale = tk.Scale(self.mouth_frame,label="Mouth Rate", orient=tk.VERTICAL, from_=0,
-                                    to=360, variable=self.mouth_rate, length=self.V_SCALE_LEN,
+        self.mouth_rate_scale = tk.Scale(self.mouth_frame,label="Mouth Rate", orient=tk.VERTICAL, from_=360,
+                                    to=0, variable=self.mouth_rate, length=self.V_SCALE_LEN,
                                     resolution=1, command=partial(self.motorRateSliderCallback, motor='mouth'))
         self.mouth_rate_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=3)
         
@@ -94,8 +94,8 @@ class cal_panel(tk.Frame):
         # head roll Rate slider
         self.head_roll_rate = tk.DoubleVar()
         self.head_roll_rate.set(self.robot.motors['head_roll'].rate)
-        self.head_roll_rate_scale = tk.Scale(self.head_roll_frame,label="Head Roll Rate", orient=tk.VERTICAL, from_=0,
-                                    to=360, variable=self.head_roll_rate, length=self.V_SCALE_LEN,
+        self.head_roll_rate_scale = tk.Scale(self.head_roll_frame,label="Head Roll Rate", orient=tk.VERTICAL, from_=360,
+                                    to=0, variable=self.head_roll_rate, length=self.V_SCALE_LEN,
                                     resolution=1, command=partial(self.motorRateSliderCallback, motor='head_roll'))
         self.head_roll_rate_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=3)
         
@@ -176,8 +176,8 @@ class cal_panel(tk.Frame):
         # fade rate slider
         self.light_fade_rate = tk.DoubleVar()
         self.light_fade_rate.set(self.robot.lights['left_eye'].rate)
-        self.light_fade_scale = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=0,
-                                    to=60, variable=self.light_fade_rate, length=self.V_SCALE_LEN,
+        self.light_fade_scale = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
+                                    to=0, variable=self.light_fade_rate, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=self.fadeRateCallback)
         self.light_fade_scale.grid(column=3, row=0, padx=10, pady=10)
         

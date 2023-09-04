@@ -11,18 +11,19 @@ with contextlib.redirect_stdout(None):
 
 class janus():
     def __init__(self, filename, test=False):
-        # initialize i2c bus and PCA9685 Module
-        self.i2c_bus = busio.I2C(SCL, SDA)
-        self.pca = PCA9685(self.i2c_bus)
-        self.test_mode = test
-        
         # load calibration file
         self.calfile = configparser.ConfigParser()
         self.calfile.read(filename)
         
+        # initialize i2c bus and PCA9685 Module
+        self.i2c_bus = busio.I2C(SCL, SDA)
+        self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca1']['addr'], 16))
+        
+        self.test_mode = test
+        
         self.pwm_period = float(self.calfile['general']['pwm_period'])
         self.update_period = float(self.calfile['general']['update_period'])
-        self.pca.frequency = round(1/self.pwm_period)
+        self.pca1.frequency = round(1/self.pwm_period)
         
         # create motor dictionary
         self.motors = dict()
@@ -30,7 +31,7 @@ class janus():
             self.params = self.calfile[i + '.movement']
             self.params.update(self.calfile['motor.' + self.params['type']])
             self.params['pwm_period'] = self.calfile['general']['pwm_period']            
-            self.motors[i] = face_motor(self.pca, self.params)
+            self.motors[i] = face_motor(self.pca1, self.params)
      
         # create light dictionary
         self.LIGHT_MIN = 0
@@ -40,7 +41,7 @@ class janus():
             self.params = self.calfile[i + '.light']
             self.params['update_period'] = self.calfile['general']['update_period']            
             self.params['color_crossfade'] = self.calfile['general']['color_crossfade']
-            self.lights[i] = rgb_led_control(self.pca, self.params)
+            self.lights[i] = rgb_led_control(self.pca1, self.params)
             
         # initialize personality mode
         self.GOOD = 0
