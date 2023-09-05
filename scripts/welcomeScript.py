@@ -35,7 +35,7 @@ def welcomeScript(robot):
     while((abs(robot.motors['eyelids'].getErr()) > 1)): 
         time.sleep(robot.update_period)
         
-    
+    time.sleep(1)
     #blink
     print('flip head')
     robot.setPersonality(robot.EVIL)
@@ -45,12 +45,12 @@ def welcomeScript(robot):
         
     # eyes move left and at halfway point, trigger head yaw left
     print('eyes move left and at halfway point, trigger head yaw left')
-    robot.setMotorCmd('eyes', (robot.motors['eyes'].ulim_angle + robot.motors['eyes'].init_angle) / 2)
+    robot.setMotorCmd('eyes', (robot.motors['eyes'].llim_angle + robot.motors['eyes'].init_angle) / 2)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    robot.setMotorCmd('eyes', robot.motors['eyes'].ulim_angle)
+    robot.setMotorCmd('eyes', robot.motors['eyes'].llim_angle)
     robot.setMotorCmd('head_yaw', robot.motors['head_yaw'].llim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1) or (abs(robot.motors['head_yaw'].getErr()) > 1)):
@@ -60,7 +60,7 @@ def welcomeScript(robot):
     
     # reverse back to start
     print('reverse back to start')
-    robot.setMotorCmd('eyelids', robot.motors['eyes'].init_angle)
+    robot.setMotorCmd('eyes', robot.motors['eyes'].init_angle)
     robot.setMotorCmd('head_yaw', robot.motors['head_yaw'].init_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1) or (abs(robot.motors['head_yaw'].getErr()) > 1)):
@@ -70,12 +70,12 @@ def welcomeScript(robot):
         
     # eyes move right and at halfway point, trigger head yaw right
     print('eyes move right and at halfway point, trigger head yaw right')
-    robot.setMotorCmd('eyes', (robot.motors['eyes'].llim_angle + robot.motors['eyes'].init_angle) / 2)
+    robot.setMotorCmd('eyes', (robot.motors['eyes'].ulim_angle + robot.motors['eyes'].init_angle) / 2)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    robot.setMotorCmd('eyes', robot.motors['eyes'].llim_angle)
+    robot.setMotorCmd('eyes', robot.motors['eyes'].ulim_angle)
     robot.setMotorCmd('head_yaw', robot.motors['head_yaw'].ulim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1) or (abs(robot.motors['head_yaw'].getErr()) > 1)):
@@ -85,7 +85,7 @@ def welcomeScript(robot):
     
     # reverse back to start
     print('reverse back to start')
-    robot.setMotorCmd('eyelids', robot.motors['eyes'].init_angle)
+    robot.setMotorCmd('eyes', robot.motors['eyes'].init_angle)
     robot.setMotorCmd('head_yaw', robot.motors['head_yaw'].init_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyes'].getErr()) > 1) or (abs(robot.motors['head_yaw'].getErr()) > 1)):
@@ -110,13 +110,13 @@ def welcomeScript(robot):
     robot.playSound('welcome')
     time.sleep(robot.update_period)
     while (robot.isTalking()):
-        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*4) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
+        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*8) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
         robot.setMotorCmd('mouth', mouth_command)
         
     robot.playSound('all that is left')
     time.sleep(robot.update_period)
     while (robot.isTalking()):
-        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*4) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
+        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*8) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
         robot.setMotorCmd('mouth', mouth_command)
         
     #blink
