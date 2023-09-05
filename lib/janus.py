@@ -1,11 +1,9 @@
-import face_motor
-import rgb_led_control
 from board import SCL, SDA
 import busio
 from adafruit_pca9685 import PCA9685
 import os, configparser, time, threading, contextlib
-from face_motor import *
-from rgb_led_control import *
+from lib.face_motor import *
+from lib.rgb_led_control import *
 with contextlib.redirect_stdout(None):
     from pygame import mixer
 
@@ -79,6 +77,9 @@ class janus():
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
         
+    def setmotorRate(self, motor, rate):
+        self.motors[motor].setRate(rate)
+        
     def setLightCmd(self, cmd):
         for i in self.lights:
             self.lights[i].setCmd(cmd[0], cmd[1], cmd[2])
@@ -93,6 +94,9 @@ class janus():
             self.sounds[sound].play()
             if(self.test_mode):
                 print(sound)
+                
+    def isTalking(self):
+        return mixer.get_busy()
         
     def update_fcn(self):
         while(True):
@@ -113,7 +117,7 @@ class janus():
                         print(self.lights[i].getOut())                
                 
                 if(self.test_mode):
-                    print(self.e_time)
+                    print('{:0.2f}'.format(self.e_time))
 
 if (__name__ == '__main__'):
     pass
