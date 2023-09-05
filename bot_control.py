@@ -18,6 +18,7 @@ class bot_control(tk.Frame):
         self.V_SCALE_LEN = 200
         
         self.robot = robot
+        self.winfo_toplevel().protocol('WM_DELETE_WINDOW', self.on_close)
         
         self.createWidgets()
                 
@@ -43,7 +44,7 @@ class bot_control(tk.Frame):
         for i in self.controls:
             self.controls[i]['state'] = tk.DISABLED
             
-        welcomeScript.welcomeScript(robot)
+        welcomeScript.welcomeScript(self.robot)
         
         for i in self.controls:
             self.controls[i]['state'] = tk.NORMAL
@@ -111,9 +112,12 @@ class bot_control(tk.Frame):
         
         self.controls['Welcome !'] = tk.Button(self.script_panel,text='Welcome !', padx=10, pady=10, command=self.scriptWelcomeCallback)
         self.controls['Welcome !'].grid(column=0, row=0, padx=10, pady=10)
+        
+    def on_close(self):
+        self.robot.deinit()
+        self.winfo_toplevel().destroy()
     
 if __name__ == '__main__':
-    robot = janus('calibration.ini', test=False)
-    window = bot_control(robot)
+    window = bot_control(janus('calibration.ini', test=False))
     window.mainloop()
 

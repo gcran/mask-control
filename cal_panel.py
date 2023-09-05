@@ -17,9 +17,12 @@ class cal_panel(tk.Frame):
         self.H_SCALE_LEN = 200
         self.V_SCALE_LEN = 200
         
+        self.winfo_toplevel().protocol('WM_DELETE_WINDOW', self.on_close)
         self.robot = robot
         
         self.createWidgets()
+        
+        
                 
     def motorPositionSliderCallback(self, cmd, motor):
         self.robot.setMotorCmd(motor, float(cmd))
@@ -40,7 +43,7 @@ class cal_panel(tk.Frame):
         for i in self.controls:
             self.controls[i]['state'] = tk.DISABLED
             
-        welcomeScript.welcomeScript(robot)
+        welcomeScript.welcomeScript(self.robot)
         
         for i in self.controls:
             self.controls[i]['state'] = tk.NORMAL
@@ -211,13 +214,15 @@ class cal_panel(tk.Frame):
         self.script_panel = tk.LabelFrame(self.master, bd=1, text="Scripts", padx=10, pady=10)
         self.script_panel.grid(column=0, row=3, columnspan=3)
         
-        self.controls['Welcome !'] = tk.Button(self.script_panel,text='Welcome !', padx=10, pady=10, command=self.scriptWelcomeCallback)
-        self.controls['Welcome !'].grid(column=0, row=0, padx=10, pady=10)
+        self.controls['Welcome!'] = tk.Button(self.script_panel,text='Welcome!', padx=10, pady=10, command=self.scriptWelcomeCallback)
+        self.controls['Welcome!'].grid(column=0, row=0, padx=10, pady=10)
         
-    
+    def on_close(self):
+        self.robot.deinit()
+        self.winfo_toplevel().destroy()
+        
 if __name__ == '__main__':
-    robot = janus('calibration.ini', test=True)
-    window = cal_panel(robot)
+    window = cal_panel(janus('calibration.ini', test=True))
     window.mainloop()
     
 
