@@ -1,7 +1,7 @@
 from board import SCL, SDA
 import busio
 from adafruit_pca9685 import PCA9685
-import os, curses, configparser, time, threading, contextlib
+import os, curses, configparser, time, threading, contextlib, math
 from lib.face_motor import *
 from lib.rgb_led_control import *
 with contextlib.redirect_stdout(None):
@@ -19,6 +19,7 @@ class janus():
         
         self.test_mode = test
         
+        # set PWM frequency and update period
         self.pwm_period = float(self.calfile['general']['pwm_period'])
         self.update_period = float(self.calfile['general']['update_period'])
         self.pca1.frequency = round(1/self.pwm_period)
@@ -35,11 +36,15 @@ class janus():
         self.LIGHT_MIN = 0
         self.LIGHT_MAX = 0xFFFF
         self.lights = dict()
-        for i in ['left_eye', 'right_eye', 'mouth']:
-            self.params = self.calfile[i + '.light']
-            self.params['update_period'] = self.calfile['general']['update_period']            
-            self.params['color_crossfade'] = self.calfile['general']['color_crossfade']
+        for i in ['eyes', 'mouth']:
+            self.params = self.calfile[i + '.lights']
+            self.params['update_period'] = self.calfile['general']['update_period']
             self.lights[i] = rgb_led_control(self.pca1, self.params)
+
+        # set mouth move/blink frequency
+        self.talk_frequency = 8
+        self.prev_talking = False
+        self.mouth_motor_offset = 0.5 * (self.motors['mouth'].ulim_angle - self.motors['mouth'].llim_angle)
             
         # initialize personality mode
         self.GOOD = 0
@@ -54,6 +59,7 @@ class janus():
         for i in list(self.calfile['sounds']):
             self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
             
+        # set up test output screen
         self.statusMsg = ''
         if self.test_mode:
             self.test_out = curses.initscr()
@@ -87,13 +93,11 @@ class janus():
     def setmotorRate(self, motor, rate):
         self.motors[motor].setRate(rate)
         
-    def setLightCmd(self, cmd):
-        for i in self.lights:
-            self.lights[i].setCmd(cmd[0], cmd[1], cmd[2])
+    def setLightCmd(self, light, rcmd, gcmd, bcmd):
+        self.lights[light].setCmd(rcmd, gcmd, bcmd)
             
-    def setCrossfadeRate(self, rate):
-        for i in self.lights:
-            self.lights[i].setRate(rate)
+    def setCrossfadeRate(self, light, rate):
+        self.lights[light].setRate(rate)
     
     def playSound(self, sound):
         if sound in self.sounds:
@@ -114,12 +118,44 @@ class janus():
             if (self.e_time >= self.update_period):
                 self.prev_time = self.c_time
                 
+                # if a sound is playing, flap the mouth/blink the mouth lights, depending on personality
+                if self.isTalking():
+                    
+                    self.talk_osc = math.sin(time.time() * math.tau * self.talk_frequency)
+                    if (self.getPersonality() == self.GOOD):
+                        if not self.prev_talking:
+                            self.mouth_amp = self.lights['mouth'].getOut()
+                            self.mouth_light_offset = (self.mouth_amp[0] * 0.5, self.mouth_amp[1] * 0.5, self.mouth_amp[2] * 0.5)
+                            self.setCrossfadeRate('mouth', 0xFFFF)
+                        
+                        self.setLightCmd('mouth', (self.mouth_light_offset[0] * self.talk_osc) + self.mouth_light_offset[0],
+                                         (self.mouth_light_offset[1] * self.talk_osc) + self.mouth_light_offset[1],
+                                         (self.mouth_light_offset[2] * self.talk_osc) + self.mouth_light_offset[2])
+                        
+                    elif (self.getPersonality() == self.EVIL):
+                        if not self.prev_talking:
+                            self.setmotorRate('mouth', 360)
+
+                        self.setMotorCmd('mouth', (self.mouth_motor_offset * self.talk_osc) + self.mouth_motor_offset)
+
+                    self.prev_talking = True
+
+                else:
+                    if self.prev_talking:
+                        self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])
+                        self.setCrossfadeRate('mouth', self.calfile['mouth.lights']['rate'])
+                        self.setmotorRate('mouth', self.calfile['mouth.movement']['rate'])
+                        self.prev_talking = False
+                
+                # send motor commands
                 for i in self.motors:
                     self.motors[i].update(self.e_time)
                 
+                # send light commands
                 for i in self.lights:
                     self.lights[i].update(self.e_time)
                 
+                # test mode output
                 if(self.test_mode):
                     self.test_out.addstr(0, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','cmd','out','err'))
                     j = 1

@@ -30,11 +30,14 @@ class cal_panel(tk.Frame):
     def motorRateSliderCallback(self, cmd, motor):
         self.robot.motors[motor].setRate(int(cmd))
         
-    def colorCallback(self, cmd):
-        self.robot.setLightCmd((self.red_pos.get(),self.green_pos.get(),self.blue_pos.get()))
+    def eyesColorCallback(self, cmd):
+        self.robot.setLightCmd('eyes', self.eyes_red_pos.get(),self.eyes_green_pos.get(),self.eyes_blue_pos.get())
         
-    def fadeRateCallback(self, cmd):
-        self.robot.setCrossfadeRate(float(cmd))
+    def mouthColorCallback(self, cmd):
+        self.robot.setLightCmd('mouth', self.mouth_red_pos.get(),self.mouth_green_pos.get(),self.mouth_blue_pos.get())
+    
+    def fadeRateCallback(self, cmd, light):
+        self.robot.setCrossfadeRate(light, float(cmd))
     
     def soundboardCallback(self, sound):
         self.robot.playSound(sound)
@@ -161,41 +164,77 @@ class cal_panel(tk.Frame):
         
         #Set buttons
         
-        # Light control
-        self.light_panel = tk.LabelFrame(self.master, bd=1, text="Lights", padx=10, pady=10)
+        # Eye Light control
+        self.light_panel = tk.LabelFrame(self.master, bd=1, text="Eye Lights", padx=10, pady=10)
         self.light_panel.grid(column=2, row=1)
         
         # Red slider
-        self.red_pos = tk.IntVar()
-        self.red_pos.set(self.robot.lights['left_eye'].getOut()[0])
-        self.controls['red_pos'] = tk.Scale(self.light_panel,label="R", orient=tk.VERTICAL, from_=65535,
-                                    to=0, variable=self.red_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=self.colorCallback)
-        self.controls['red_pos'].grid(column=0, row=0, padx=10, pady=10)
+        self.eyes_red_pos = tk.IntVar()
+        self.eyes_red_pos.set(self.robot.lights['eyes'].getOut()[0])
+        self.controls['eyes_red_pos'] = tk.Scale(self.light_panel,label="R", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.eyes_red_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.eyesColorCallback)
+        self.controls['eyes_red_pos'].grid(column=0, row=0, padx=10, pady=10)
         
         # Green slider
-        self.green_pos = tk.IntVar()
-        self.green_pos.set(self.robot.lights['left_eye'].getOut()[1])
-        self.controls['green_pos'] = tk.Scale(self.light_panel,label="G", orient=tk.VERTICAL, from_=65535,
-                                    to=0, variable=self.green_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=self.colorCallback)
-        self.controls['green_pos'].grid(column=1, row=0, padx=10, pady=10)
+        self.eyes_green_pos = tk.IntVar()
+        self.eyes_green_pos.set(self.robot.lights['eyes'].getOut()[1])
+        self.controls['eyes_green_pos'] = tk.Scale(self.light_panel,label="G", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.eyes_green_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.eyesColorCallback)
+        self.controls['eyes_green_pos'].grid(column=1, row=0, padx=10, pady=10)
         
         # Blue slider
-        self.blue_pos = tk.IntVar()
-        self.blue_pos.set(self.robot.lights['left_eye'].getOut()[2])
-        self.controls['blue_pos'] = tk.Scale(self.light_panel,label="B", orient=tk.VERTICAL, from_=65535,
-                                    to=0, variable=self.blue_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=self.colorCallback)
-        self.controls['blue_pos'].grid(column=2, row=0, padx=10, pady=10)
+        self.eyes_blue_pos = tk.IntVar()
+        self.eyes_blue_pos.set(self.robot.lights['eyes'].getOut()[2])
+        self.controls['eyes_blue_pos'] = tk.Scale(self.light_panel,label="B", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.eyes_blue_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.eyesColorCallback)
+        self.controls['eyes_blue_pos'].grid(column=2, row=0, padx=10, pady=10)
         
         # fade rate slider
-        self.light_fade_rate = tk.DoubleVar()
-        self.light_fade_rate.set(self.robot.lights['left_eye'].rate)
-        self.controls['light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
-                                    to=0, variable=self.light_fade_rate, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=self.fadeRateCallback)
-        self.controls['light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
+        self.eyes_light_fade_rate = tk.DoubleVar()
+        self.eyes_light_fade_rate.set(self.robot.lights['eyes'].rate)
+        self.controls['eye_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
+                                    to=0, variable=self.eyes_light_fade_rate, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=partial(self.fadeRateCallback, light = 'eyes'))
+        self.controls['eye_light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
+
+        # Mouth Light control
+        self.light_panel = tk.LabelFrame(self.master, bd=1, text="Mouth Lights", padx=10, pady=10)
+        self.light_panel.grid(column=3, row=1)
+        
+        # Red slider
+        self.mouth_red_pos = tk.IntVar()
+        self.mouth_red_pos.set(self.robot.lights['mouth'].getOut()[0])
+        self.controls['mouth_red_pos'] = tk.Scale(self.light_panel,label="R", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.mouth_red_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.mouthColorCallback)
+        self.controls['mouth_red_pos'].grid(column=0, row=0, padx=10, pady=10)
+        
+        # Green slider
+        self.mouth_green_pos = tk.IntVar()
+        self.mouth_green_pos.set(self.robot.lights['mouth'].getOut()[1])
+        self.controls['mouth_green_pos'] = tk.Scale(self.light_panel,label="G", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.mouth_green_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.mouthColorCallback)
+        self.controls['mouth_green_pos'].grid(column=1, row=0, padx=10, pady=10)
+        
+        # Blue slider
+        self.mouth_blue_pos = tk.IntVar()
+        self.mouth_blue_pos.set(self.robot.lights['mouth'].getOut()[2])
+        self.controls['mouth_blue_pos'] = tk.Scale(self.light_panel,label="B", orient=tk.VERTICAL, from_=65535,
+                                    to=0, variable=self.mouth_blue_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.mouthColorCallback)
+        self.controls['mouth_blue_pos'].grid(column=2, row=0, padx=10, pady=10)
+        
+        # fade rate slider
+        self.mouth_light_fade_rate = tk.DoubleVar()
+        self.mouth_light_fade_rate.set(self.robot.lights['mouth'].rate)
+        self.controls['mouth_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
+                                    to=0, variable=self.mouth_light_fade_rate, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=self.mouthColorCallback)
+        self.controls['mouth_light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
         
         
         # Sound Panel

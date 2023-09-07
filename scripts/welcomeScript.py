@@ -17,7 +17,6 @@ def welcomeScript(robot):
     #wake up
     robot.setStatusMsg('wake up')
     robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
-    robot.setLightCmd((robot.LIGHT_MIN, robot.LIGHT_MAX, robot.LIGHT_MIN))
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
@@ -110,14 +109,12 @@ def welcomeScript(robot):
     robot.playSound('welcome')
     time.sleep(robot.update_period)
     while (robot.isTalking()):
-        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*8) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
-        robot.setMotorCmd('mouth', mouth_command)
+        time.sleep(robot.update_period)
         
     robot.playSound('all that is left')
     time.sleep(robot.update_period)
     while (robot.isTalking()):
-        mouth_command = ((robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle)  * math.sin((time.time()*8) % math.tau)) + (robot.motors['mouth'].llim_angle + (robot.motors['mouth'].ulim_angle - robot.motors['mouth'].llim_angle) / 2)
-        robot.setMotorCmd('mouth', mouth_command)
+        time.sleep(robot.update_period)
         
     #blink
     robot.setStatusMsg('blink')

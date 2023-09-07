@@ -6,7 +6,7 @@ class rgb_led_control():
         # cross fade rate in seconds
         self.max_count = 65535
         self.min_count = 0
-        self.rate = float(params['color_crossfade'])
+        self.rate = float(params['rate'])
         self.update_period = float(params['update_period'])
         self.rate_count = round(self.max_count / max(self.update_period, self.rate))
         
