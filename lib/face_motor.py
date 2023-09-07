@@ -28,9 +28,9 @@ class face_motor():
         self.err = self.cmd_count - self.out_count
         self.max_step_count = round((self.rate * time) * self.angle2count)
         if (self.err > 0):
-            self.out_count = min(self.max_count, self.out_count + min(self.max_step_count, self.err))
+            self.out_count = min(self.max_count, max(self.min_count, self.out_count + min(self.max_step_count, self.err)))
         else:
-            self.out_count = max(self.min_count, self.out_count + max(-self.max_step_count, self.err))
+            self.out_count = max(self.min_count, min(self.max_count, self.out_count + max(-self.max_step_count, self.err)))
 
         self.pca.channels[self.channel].duty_cycle = self.out_count
 

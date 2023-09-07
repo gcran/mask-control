@@ -4,15 +4,13 @@ def welcomeScript(robot):
     
     #set to initial state
     robot.setStatusMsg('set to initial state')
-    robot.setPersonality(robot.GOOD)
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
+    robot.setPersonality(robot.SLEEP)
     robot.setMotorCmd('head_yaw', robot.motors['head_yaw'].init_angle)
-    robot.setMotorCmd('eyes', robot.motors['eyes'].init_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1) or (abs(robot.motors['head_yaw'].getErr()) > 1) or (abs(robot.motors['eyes'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    time.sleep(1)
+    time.sleep(2)
     
     #wake up
     robot.setStatusMsg('wake up')

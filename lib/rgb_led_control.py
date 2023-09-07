@@ -42,8 +42,8 @@ class rgb_led_control():
         for i in ['r', 'g', 'b']:
             self.err[i] = self.cmd[i] - self.out[i]
             if (self.err[i] > 0):
-                self.out[i] = min(self.max_count, self.out[i] + min(self.max_step_count, self.err[i]))
+                self.out[i] = min(self.max_count, max(self.min_count, self.out[i] + min(self.max_step_count, self.err[i])))
             else:
-                self.out[i] = max(self.min_count, self.out[i] + max(-self.max_step_count, self.err[i]))
+                self.out[i] = max(self.min_count, min(self.max_count, self.out[i] + max(-self.max_step_count, self.err[i])))
                 
             self.pca.channels[self.channel[i]].duty_cycle = self.out[i]

@@ -91,9 +91,14 @@ class bot_control(tk.Frame):
                                                 variable=self.personality, command=self.personalityCallback)
         self.controls['radio_evil'] = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
                                                 variable=self.personality, command=self.personalityCallback)
-        self.controls['radio_good'].grid(column=0,row=0, sticky=tk.W)
-        self.controls['radio_evil'].grid(column=0,row=1, sticky=tk.W)
-        self.controls['radio_good'].select()
+        self.controls['radio_sleep'] = tk.Radiobutton(self.personalityFrame, text="Sleep",value=self.robot.SLEEP,
+                                                variable=self.personality, command=self.personalityCallback)
+        
+        self.controls['radio_sleep'].grid(column=0,row=0, sticky=tk.W)
+        self.controls['radio_good'].grid(column=0,row=1, sticky=tk.W)
+        self.controls['radio_evil'].grid(column=0,row=2, sticky=tk.W)
+        self.controls['radio_sleep'].select()
+        self.controls['radio_good'].deselect()
         self.controls['radio_evil'].deselect()
         
         self.SoundboardFrame = tk.LabelFrame(self.master, bd=1, text="Soundboard")

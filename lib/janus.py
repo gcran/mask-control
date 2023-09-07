@@ -13,23 +13,24 @@ class janus():
         self.calfile = configparser.ConfigParser()
         self.calfile.read(filename)
         
-        # initialize i2c bus and PCA9685 Module
+        # initialize i2c bus and PCA9685 Modules
         self.i2c_bus = busio.I2C(SCL, SDA)
-        self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca1']['addr'], 16))
+        self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca1']['addr'], 16))        
+        self.pwm_period = float(self.calfile['pca1']['pwm_period'])
+        self.pca1.frequency = round(1/self.pwm_period)
         
         self.test_mode = test
         
         # set PWM frequency and update period
-        self.pwm_period = float(self.calfile['general']['pwm_period'])
         self.update_period = float(self.calfile['general']['update_period'])
-        self.pca1.frequency = round(1/self.pwm_period)
+        
         
         # create motor dictionary
         self.motors = dict()
         for i in ['eyes', 'eyelids', 'mouth', 'head_roll', 'head_yaw']:
             self.params = self.calfile[i + '.movement']
             self.params.update(self.calfile['motor.' + self.params['type']])
-            self.params['pwm_period'] = self.calfile['general']['pwm_period']            
+            self.params['pwm_period'] = self.calfile['pca1']['pwm_period']       
             self.motors[i] = face_motor(self.pca1, self.params)
      
         # create light dictionary
@@ -42,14 +43,15 @@ class janus():
             self.lights[i] = rgb_led_control(self.pca1, self.params)
 
         # set mouth move/blink frequency
-        self.talk_frequency = 2
+        self.talk_frequency = float(self.calfile['general']['mouth_frequency'])
         self.prev_talking = False
         self.mouth_motor_offset = 0.5 * (self.motors['mouth'].ulim_angle - self.motors['mouth'].llim_angle)
             
         # initialize personality mode
         self.GOOD = 0
         self.EVIL = 1
-        self.setPersonality(self.GOOD)
+        self.SLEEP = 2
+        self.setPersonality(self.SLEEP)
         
         # create sound dictionary
         mixer.init()
@@ -73,15 +75,28 @@ class janus():
       
     def setPersonality(self, mode):
         self.personality = mode
+
         if (self.personality == self.EVIL):
             self.motors['head_roll'].setCmd(self.motors['head_roll'].ulim_angle)
-            self.lights['eyes'].setCmd(self.LIGHT_MAX, self.LIGHT_MIN, self.LIGHT_MIN)
-            self.lights['mouth'].setCmd(self.LIGHT_MIN, self.LIGHT_MIN, self.LIGHT_MIN)
-
-        else:
-            self.motors['head_roll'].setCmd(self.motors['head_roll'].llim_angle)
+            self.motors['eyelids'].setCmd(self.motors['eyelids'].ulim_angle)
             for i in self.lights:
-                self.lights[i].setCmd(self.LIGHT_MIN, self.LIGHT_MAX, self.LIGHT_MIN)
+                self.lights[i].setCmd(int(self.calfile['color.evil']['red'], 16),
+                                      int(self.calfile['color.evil']['green'], 16),
+                                      int(self.calfile['color.evil']['blue'], 16))
+        elif (self.personality == self.GOOD):
+            self.motors['head_roll'].setCmd(self.motors['head_roll'].llim_angle)
+            self.motors['eyelids'].setCmd(self.motors['eyelids'].ulim_angle)
+            
+            for i in self.lights:
+                self.lights[i].setCmd(int(self.calfile['color.good']['red'], 16),
+                                      int(self.calfile['color.good']['green'], 16),
+                                      int(self.calfile['color.good']['blue'], 16))
+        else:
+            self.motors['eyelids'].setCmd(self.motors['eyelids'].llim_angle)
+            for i in self.lights:
+                self.lights[i].setCmd(int(self.calfile['color.sleep']['red'], 16),
+                                      int(self.calfile['color.sleep']['green'], 16),
+                                      int(self.calfile['color.sleep']['blue'], 16))
     
     def getPersonality(self):
         return self.personality
@@ -148,7 +163,7 @@ class janus():
                             self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
                         elif (self.getPersonality() == self.EVIL):
                             self.setMotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
-                            self.setMotorCmd('mouth', self.motors['mouth'].llim_angle)
+                            self.setMotorCmd('mouth', self.motors['mouth'].init_angle)
                         
                         self.prev_talking = False
                 
