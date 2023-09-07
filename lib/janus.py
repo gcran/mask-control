@@ -49,9 +49,7 @@ class janus():
         # initialize personality mode
         self.GOOD = 0
         self.EVIL = 1
-        
-        if not self.test_mode:
-            self.setPersonality(self.GOOD)
+        self.setPersonality(self.GOOD)
         
         # create sound dictionary
         mixer.init()
@@ -143,8 +141,8 @@ class janus():
                 else:
                     if self.prev_talking:
                         self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])
-                        self.setCrossfadeRate('mouth', self.calfile['mouth.lights']['rate'])
-                        self.setmotorRate('mouth', self.calfile['mouth.movement']['rate'])
+                        self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
+                        self.setmotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
                         self.prev_talking = False
                 
                 # send motor commands
@@ -157,16 +155,16 @@ class janus():
                 
                 # test mode output
                 if(self.test_mode):
-                    self.test_out.addstr(0, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','cmd','out','err'))
+                    self.test_out.addstr(0, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','cmd','out','err'))
                     j = 1
                     for i in self.motors:
-                        self.test_out.addstr(j, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr()))
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr()))
                         j = j + 1
                         
-                    self.test_out.addstr(j, 0, '\n{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','r','g','b'))
+                    self.test_out.addstr(j, 0, '\n{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','R','G','B'))
                     j = j + 2
                     for i in self.lights:
-                        self.test_out.addstr(j, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.lights[i].getOut()[0],self.lights[i].getOut()[1],self.lights[i].getOut()[2]))     
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.lights[i].getOut()[0],self.lights[i].getOut()[1],self.lights[i].getOut()[2]))     
                         j = j + 1
                         
                     self.test_out.addstr(j, 0, 'Interval: {:0.2f} seconds'.format(self.e_time))
