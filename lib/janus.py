@@ -42,7 +42,7 @@ class janus():
             self.lights[i] = rgb_led_control(self.pca1, self.params)
 
         # set mouth move/blink frequency
-        self.talk_frequency = 8
+        self.talk_frequency = 2
         self.prev_talking = False
         self.mouth_motor_offset = 0.5 * (self.motors['mouth'].ulim_angle - self.motors['mouth'].llim_angle)
             
@@ -75,8 +75,9 @@ class janus():
         self.personality = mode
         if (self.personality == self.EVIL):
             self.motors['head_roll'].setCmd(self.motors['head_roll'].ulim_angle)
-            for i in self.lights:
-                self.lights[i].setCmd(self.LIGHT_MAX, self.LIGHT_MIN, self.LIGHT_MIN)
+            self.lights['eyes'].setCmd(self.LIGHT_MAX, self.LIGHT_MIN, self.LIGHT_MIN)
+            self.lights['mouth'].setCmd(self.LIGHT_MIN, self.LIGHT_MIN, self.LIGHT_MIN)
+
         else:
             self.motors['head_roll'].setCmd(self.motors['head_roll'].llim_angle)
             for i in self.lights:
@@ -88,7 +89,7 @@ class janus():
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
         
-    def setmotorRate(self, motor, rate):
+    def setMotorRate(self, motor, rate):
         self.motors[motor].setRate(rate)
         
     def setLightCmd(self, light, rcmd, gcmd, bcmd):
@@ -120,30 +121,37 @@ class janus():
                 if self.isTalking():
                     
                     self.talk_osc = math.sin(time.time() * math.tau * self.talk_frequency)
+                    
                     if (self.getPersonality() == self.GOOD):
                         if not self.prev_talking:
                             self.mouth_amp = self.lights['mouth'].getOut()
                             self.mouth_light_offset = (self.mouth_amp[0] * 0.5, self.mouth_amp[1] * 0.5, self.mouth_amp[2] * 0.5)
-                            self.setCrossfadeRate('mouth', 0xFFFF)
+                            self.setCrossfadeRate('mouth', 0)
                         
                         self.setLightCmd('mouth', (self.mouth_light_offset[0] * self.talk_osc) + self.mouth_light_offset[0],
                                          (self.mouth_light_offset[1] * self.talk_osc) + self.mouth_light_offset[1],
                                          (self.mouth_light_offset[2] * self.talk_osc) + self.mouth_light_offset[2])
-                        
+                                                                        
                     elif (self.getPersonality() == self.EVIL):
                         if not self.prev_talking:
-                            self.setmotorRate('mouth', 360)
+                            self.setMotorRate('mouth', 360)
 
                         self.setMotorCmd('mouth', (self.mouth_motor_offset * self.talk_osc) + self.mouth_motor_offset)
+                        
 
                     self.prev_talking = True
 
                 else:
                     if self.prev_talking:
-                        self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])
-                        self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
-                        self.setmotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
+                        if (self.getPersonality() == self.GOOD):
+                            self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])                            
+                            self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
+                        elif (self.getPersonality() == self.EVIL):
+                            self.setMotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
+                            self.setMotorCmd('mouth', self.motors['mouth'].llim_angle)
+                        
                         self.prev_talking = False
+                
                 
                 # send motor commands
                 for i in self.motors:
@@ -155,16 +163,19 @@ class janus():
                 
                 # test mode output
                 if(self.test_mode):
-                    self.test_out.addstr(0, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','cmd','out','err'))
+                    self.test_out.addstr(0, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(' ','cmd','out','err','rate'))
                     j = 1
                     for i in self.motors:
-                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr()))
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr(),self.motors[i].getRate()))
                         j = j + 1
-                        
-                    self.test_out.addstr(j, 0, '\n{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','R','G','B'))
-                    j = j + 2
+                    
+                    j = j + 1    
                     for i in self.lights:
-                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.lights[i].getOut()[0],self.lights[i].getOut()[1],self.lights[i].getOut()[2]))     
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(i + ' red',self.lights[i].getCmd()[0],self.lights[i].getOut()[0],self.lights[i].getErr()[0],self.lights[i].getRate()))
+                        j = j + 1   
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(i + ' green',self.lights[i].getCmd()[1],self.lights[i].getOut()[1],self.lights[i].getErr()[1],self.lights[i].getRate()))
+                        j = j + 1   
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(i + ' blue',self.lights[i].getCmd()[2],self.lights[i].getOut()[2],self.lights[i].getErr()[2],self.lights[i].getRate()))     
                         j = j + 1
                         
                     self.test_out.addstr(j, 0, 'Interval: {:0.2f} seconds'.format(self.e_time))

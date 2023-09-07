@@ -17,16 +17,25 @@ class rgb_led_control():
         
     def setCmd(self, rcmd, gcmd, bcmd):     
         
-        self.cmd['r'] = rcmd
-        self.cmd['g'] = gcmd
-        self.cmd['b'] = bcmd
+        self.cmd['r'] = round(rcmd)
+        self.cmd['g'] = round(gcmd)
+        self.cmd['b'] = round(bcmd)
         
     def setRate(self, rate):
         self.rate = rate
         self.rate_count = round(self.max_count / max(self.update_period, self.rate))
         
+    def getRate(self):
+        return self.rate
+    
     def getOut(self):
         return (self.out['r'], self.out['g'], self.out['b'])
+    
+    def getCmd(self):
+        return (self.cmd['r'], self.cmd['g'], self.cmd['b'])
+    
+    def getErr(self):
+        return (self.err['r'], self.err['g'], self.err['b'])
     
     def update(self, time):
         self.max_step_count = round((self.rate_count * time))

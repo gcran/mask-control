@@ -28,7 +28,7 @@ class cal_panel(tk.Frame):
         self.robot.setMotorCmd(motor, float(cmd))
         
     def motorRateSliderCallback(self, cmd, motor):
-        self.robot.motors[motor].setRate(int(cmd))
+        self.robot.setMotorRate(motor, int(cmd))
         
     def eyesColorCallback(self, cmd):
         self.robot.setLightCmd('eyes', self.eyes_red_pos.get(),self.eyes_green_pos.get(),self.eyes_blue_pos.get())
@@ -41,6 +41,9 @@ class cal_panel(tk.Frame):
     
     def soundboardCallback(self, sound):
         self.robot.playSound(sound)
+
+    def personalityCallback(self):
+        self.robot.setPersonality(self.personality.get())
         
     def scriptWelcomeCallback(self):
         for i in self.controls:
@@ -164,6 +167,19 @@ class cal_panel(tk.Frame):
         
         #Set buttons
         
+        # personality selector
+        self.personalityFrame = tk.LabelFrame(self.master, bd=1, text="Personality", padx=10, pady=10)
+        self.personalityFrame.grid(column=3, row=0)
+        self.personality = tk.IntVar()
+        self.controls['radio_good'] = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD,
+                                                variable=self.personality, command=self.personalityCallback)
+        self.controls['radio_evil'] = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
+                                                variable=self.personality, command=self.personalityCallback)
+        self.controls['radio_good'].grid(column=0,row=0, sticky=tk.W)
+        self.controls['radio_evil'].grid(column=0,row=1, sticky=tk.W)
+        self.controls['radio_good'].select()
+        self.controls['radio_evil'].deselect()
+        
         # Eye Light control
         self.light_panel = tk.LabelFrame(self.master, bd=1, text="Eye Lights", padx=10, pady=10)
         self.light_panel.grid(column=2, row=1)
@@ -233,7 +249,7 @@ class cal_panel(tk.Frame):
         self.mouth_light_fade_rate.set(self.robot.lights['mouth'].rate)
         self.controls['mouth_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
                                     to=0, variable=self.mouth_light_fade_rate, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=self.mouthColorCallback)
+                                    resolution=self.SCALE_RES, command=partial(self.fadeRateCallback, light = 'mouth'))
         self.controls['mouth_light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
         
         

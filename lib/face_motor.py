@@ -44,5 +44,5 @@ class face_motor():
         return self.err
     
     def getRate(self):
-        return self.max_step_angle
+        return self.rate
 
