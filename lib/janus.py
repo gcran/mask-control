@@ -1,11 +1,9 @@
-import face_motor
-import rgb_led_control
 from board import SCL, SDA
 import busio
 from adafruit_pca9685 import PCA9685
-import os, configparser, time, threading, contextlib
-from face_motor import *
-from rgb_led_control import *
+import os, curses, configparser, time, threading, contextlib
+from lib.face_motor import *
+from lib.rgb_led_control import *
 with contextlib.redirect_stdout(None):
     from pygame import mixer
 
@@ -55,8 +53,15 @@ class janus():
         self.sounds = dict()
         for i in list(self.calfile['sounds']):
             self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
+            
+        self.statusMsg = ''
+        if self.test_mode:
+            self.test_out = curses.initscr()
+            curses.cbreak()
+            curses.noecho()
         
         # initialize output thread
+        self.running = True
         self.prev_time = time.time_ns()
         self.output_thread = threading.Thread(target = self.update_fcn, daemon = True)
         self.output_thread.start()
@@ -79,6 +84,9 @@ class janus():
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
         
+    def setmotorRate(self, motor, rate):
+        self.motors[motor].setRate(rate)
+        
     def setLightCmd(self, cmd):
         for i in self.lights:
             self.lights[i].setCmd(cmd[0], cmd[1], cmd[2])
@@ -91,29 +99,52 @@ class janus():
         if sound in self.sounds:
             mixer.stop()
             self.sounds[sound].play()
-            if(self.test_mode):
-                print(sound)
+            self.setStatusMsg('Playing: ' + sound)
+                
+    def isTalking(self):
+        return mixer.get_busy()
+        
+    def setStatusMsg(self, msg):
+        self.statusMsg = str(msg)
         
     def update_fcn(self):
-        while(True):
+        while(self.running):
             self.c_time = time.time_ns()
             self.e_time = (self.c_time - self.prev_time) * 1e-9
             if (self.e_time >= self.update_period):
                 self.prev_time = self.c_time
-                if mixer.get_busy():
-                    self.blink = True
                 
                 for i in self.motors:
                     self.motors[i].update(self.e_time)
-                    if(self.test_mode):
-                        print(i + ':\tcmd:\t' + str(self.motors[i].getCmd()) + '\tout:\t' + str(self.motors[i].getOutput()) + '\terr:\t' + str(self.motors[i].getErr()))
+                
                 for i in self.lights:
                     self.lights[i].update(self.e_time)
-                    if(self.test_mode):
-                        print(self.lights[i].getOut())                
                 
                 if(self.test_mode):
-                    print(self.e_time)
+                    self.test_out.addstr(0, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','cmd','out','err'))
+                    j = 1
+                    for i in self.motors:
+                        self.test_out.addstr(j, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr()))
+                        j = j + 1
+                        
+                    self.test_out.addstr(j, 0, '\n{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(' ','r','g','b'))
+                    j = j + 2
+                    for i in self.lights:
+                        self.test_out.addstr(j, 0, '{0:>10}\t{1:>10}\t{2:>10}\t{3:>10}'.format(i,self.lights[i].getOut()[0],self.lights[i].getOut()[1],self.lights[i].getOut()[2]))     
+                        j = j + 1
+                        
+                    self.test_out.addstr(j, 0, 'Interval: {:0.2f} seconds'.format(self.e_time))
+                    j = j + 1
+                    self.test_out.addstr(j, 0, '{:<80}'.format(self.statusMsg))
+                    self.test_out.refresh()
+                
+    def deinit(self):
+        self.running = False
+        self.output_thread.join()
+        if(self.test_mode):
+            curses.nocbreak()
+            curses.echo()
+            curses.endwin()
 
 if (__name__ == '__main__'):
     pass
