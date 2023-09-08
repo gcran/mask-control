@@ -232,7 +232,7 @@ class cal_panel(tk.Frame):
         # fade rate slider
         self.eyes_light_fade_rate = tk.DoubleVar()
         self.eyes_light_fade_rate.set(self.robot.lights['eyes'].rate)
-        self.controls['eye_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
+        self.controls['eye_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=10,
                                     to=0, variable=self.eyes_light_fade_rate, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=partial(self.fadeRateCallback, light = 'eyes'))
         self.controls['eye_light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
@@ -268,7 +268,7 @@ class cal_panel(tk.Frame):
         # fade rate slider
         self.mouth_light_fade_rate = tk.DoubleVar()
         self.mouth_light_fade_rate.set(self.robot.lights['mouth'].rate)
-        self.controls['mouth_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=60,
+        self.controls['mouth_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=10,
                                     to=0, variable=self.mouth_light_fade_rate, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=partial(self.fadeRateCallback, light = 'mouth'))
         self.controls['mouth_light_fade_rate'].grid(column=3, row=0, padx=10, pady=10)
