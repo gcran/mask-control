@@ -35,13 +35,13 @@ class face_motor():
         self.pca.channels[self.channel].duty_cycle = self.out_count
 
     def getCmd(self):
-        return self.out_count
+        return (self.cmd_count - self.min_count) / self.angle2count
 
     def getOutput(self):
-        return self.out_count
+        return (self.out_count - self.min_count) / self.angle2count
 
     def getErr(self):
-        return self.err
+        return self.err / self.angle2count
     
     def getRate(self):
         return self.rate

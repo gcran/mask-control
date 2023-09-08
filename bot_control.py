@@ -39,6 +39,7 @@ class bot_control(tk.Frame):
         
     def personalityCallback(self):
         self.robot.setPersonality(self.personality.get())
+        self.updateWidgets()
         
     def scriptWelcomeCallback(self):
         for i in self.controls:
@@ -48,6 +49,14 @@ class bot_control(tk.Frame):
         
         for i in self.controls:
             self.controls[i]['state'] = tk.NORMAL
+
+        self.updateWidgets()
+
+    def updateWidgets(self):
+        self.eyelid_pos.set(self.robot.getMotorCmd('eyelids'))
+        self.mouth_pos.set(self.robot.getMotorCmd('mouth'))
+        self.head_yaw_pos.set(self.robot.getMotorCmd('head_yaw'))
+        self.eye_pos.set(self.robot.getMotorCmd('eyes'))
         
     def createWidgets(self):
         self.controls = dict()

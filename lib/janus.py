@@ -74,41 +74,61 @@ class janus():
         
       
     def setPersonality(self, mode):
-        self.personality = mode
 
-        if (self.personality == self.EVIL):
-            self.motors['head_roll'].setCmd(self.motors['head_roll'].ulim_angle)
-            self.motors['eyelids'].setCmd(self.motors['eyelids'].ulim_angle)
-            for i in self.lights:
-                self.lights[i].setCmd(int(self.calfile['color.evil']['red'], 16),
-                                      int(self.calfile['color.evil']['green'], 16),
-                                      int(self.calfile['color.evil']['blue'], 16))
-        elif (self.personality == self.GOOD):
+        if (mode == self.EVIL):
+            self.setMotorCmd('head_roll', self.motors['head_roll'].ulim_angle)
+            self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
+            if (self.personality == self.GOOD):
+                self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
+
+            
+            self.lights['eyes'].setCmd(int(self.calfile['color.evil']['eyes_red'], 16),
+                                    int(self.calfile['color.evil']['eyes_green'], 16),
+                                    int(self.calfile['color.evil']['eyes_blue'], 16))
+            self.lights['mouth'].setCmd(int(self.calfile['color.evil']['mouth_red'], 16),
+                                    int(self.calfile['color.evil']['mouth_green'], 16),
+                                    int(self.calfile['color.evil']['mouth_blue'], 16))
+            
+        elif (mode == self.GOOD):
             self.motors['head_roll'].setCmd(self.motors['head_roll'].llim_angle)
             self.motors['eyelids'].setCmd(self.motors['eyelids'].ulim_angle)
-            
-            for i in self.lights:
-                self.lights[i].setCmd(int(self.calfile['color.good']['red'], 16),
-                                      int(self.calfile['color.good']['green'], 16),
-                                      int(self.calfile['color.good']['blue'], 16))
+            if (self.personality == self.EVIL):
+                self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
+
+            self.lights['eyes'].setCmd(int(self.calfile['color.good']['eyes_red'], 16),
+                                    int(self.calfile['color.good']['eyes_green'], 16),
+                                    int(self.calfile['color.good']['eyes_blue'], 16))
+            self.lights['mouth'].setCmd(int(self.calfile['color.good']['mouth_red'], 16),
+                                    int(self.calfile['color.good']['mouth_green'], 16),
+                                    int(self.calfile['color.good']['mouth_blue'], 16))
         else:
-            self.motors['eyelids'].setCmd(self.motors['eyelids'].llim_angle)
-            for i in self.lights:
-                self.lights[i].setCmd(int(self.calfile['color.sleep']['red'], 16),
-                                      int(self.calfile['color.sleep']['green'], 16),
-                                      int(self.calfile['color.sleep']['blue'], 16))
+            self.setMotorCmd('eyes', self.motors['eyes'].init_angle)
+            self.lights['eyes'].setCmd(int(self.calfile['color.sleep']['eyes_red'], 16),
+                                    int(self.calfile['color.sleep']['eyes_green'], 16),
+                                    int(self.calfile['color.sleep']['eyes_blue'], 16))
+            self.lights['mouth'].setCmd(int(self.calfile['color.sleep']['mouth_red'], 16),
+                                    int(self.calfile['color.sleep']['mouth_green'], 16),
+                                    int(self.calfile['color.sleep']['mouth_blue'], 16))
+                
+        self.personality = mode
     
     def getPersonality(self):
         return self.personality
     
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
+
+    def getMotorCmd(self, motor):
+        return self.motors[motor].getCmd()
         
     def setMotorRate(self, motor, rate):
         self.motors[motor].setRate(rate)
         
     def setLightCmd(self, light, rcmd, gcmd, bcmd):
         self.lights[light].setCmd(rcmd, gcmd, bcmd)
+
+    def getLightCmd(self, light):
+        return self.lights[light].getCmd()
             
     def setCrossfadeRate(self, light, rate):
         self.lights[light].setRate(rate)
@@ -181,7 +201,7 @@ class janus():
                     self.test_out.addstr(0, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(' ','cmd','out','err','rate'))
                     j = 1
                     for i in self.motors:
-                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10}\t{2:>10}\t{3:>10}\t{4:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr(),self.motors[i].getRate()))
+                        self.test_out.addstr(j, 0, '{0:<10}\t{1:>10.0f}\t{2:>10.0f}\t{3:>10.0f}\t{4:>10}'.format(i,self.motors[i].getCmd(),self.motors[i].getOutput(),self.motors[i].getErr(),self.motors[i].getRate()))
                         j = j + 1
                     
                     j = j + 1    

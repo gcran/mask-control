@@ -21,8 +21,6 @@ class cal_panel(tk.Frame):
         self.robot = robot
         
         self.createWidgets()
-        
-        
                 
     def motorPositionSliderCallback(self, cmd, motor):
         self.robot.setMotorCmd(motor, float(cmd))
@@ -44,16 +42,34 @@ class cal_panel(tk.Frame):
 
     def personalityCallback(self):
         self.robot.setPersonality(self.personality.get())
+        self.updateWidgets()
         
     def scriptWelcomeCallback(self):
         for i in self.controls:
             self.controls[i]['state'] = tk.DISABLED
             
         welcomeScript.welcomeScript(self.robot)
+
+        self.updateWidgets()
         
         for i in self.controls:
             self.controls[i]['state'] = tk.NORMAL
         
+    def updateWidgets(self):
+        self.eyelid_pos.set(self.robot.getMotorCmd('eyelids'))
+        self.mouth_pos.set(self.robot.getMotorCmd('mouth'))
+        self.head_roll_pos.set(self.robot.getMotorCmd('head_roll'))
+        self.head_yaw_pos.set(self.robot.getMotorCmd('head_yaw'))
+        self.eye_pos.set(self.robot.getMotorCmd('eyes'))
+
+        self.eyes_red_pos.set(self.robot.getLightCmd('eyes')[0])
+        self.eyes_green_pos.set(self.robot.getLightCmd('eyes')[1])
+        self.eyes_blue_pos.set(self.robot.getLightCmd('eyes')[2])
+
+        self.mouth_red_pos.set(self.robot.getLightCmd('mouth')[0])
+        self.mouth_green_pos.set(self.robot.getLightCmd('mouth')[1])
+        self.mouth_blue_pos.set(self.robot.getLightCmd('mouth')[2])
+    
     def createWidgets(self):
         
         self.controls = dict()
@@ -260,7 +276,7 @@ class cal_panel(tk.Frame):
         
         # Sound Panel
         self.sound_panel = tk.LabelFrame(self.master, bd=1, text="Soundboard")
-        self.sound_panel.grid(column=0, row=2, columnspan=3)
+        self.sound_panel.grid(column=0, row=2, columnspan=4)
         
         j = 0
         for i in list(self.robot.sounds):
@@ -272,7 +288,7 @@ class cal_panel(tk.Frame):
         
         # Script panel
         self.script_panel = tk.LabelFrame(self.master, bd=1, text="Scripts", padx=10, pady=10)
-        self.script_panel.grid(column=0, row=3, columnspan=3)
+        self.script_panel.grid(column=0, row=3, columnspan=4)
         
         self.controls['Welcome!'] = tk.Button(self.script_panel,text='Welcome!', padx=10, pady=10, command=self.scriptWelcomeCallback)
         self.controls['Welcome!'].grid(column=0, row=0, padx=10, pady=10)
