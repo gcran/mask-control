@@ -6,7 +6,7 @@ class rgb_led_control():
         # cross fade rate in seconds
         self.max_count = 65535
         self.min_count = 0
-        self.rate = float(params['color_crossfade'])
+        self.rate = float(params['rate'])
         self.update_period = float(params['update_period'])
         self.rate_count = round(self.max_count / max(self.update_period, self.rate))
         
@@ -17,24 +17,33 @@ class rgb_led_control():
         
     def setCmd(self, rcmd, gcmd, bcmd):     
         
-        self.cmd['r'] = rcmd
-        self.cmd['g'] = gcmd
-        self.cmd['b'] = bcmd
+        self.cmd['r'] = round(rcmd)
+        self.cmd['g'] = round(gcmd)
+        self.cmd['b'] = round(bcmd)
         
     def setRate(self, rate):
         self.rate = rate
         self.rate_count = round(self.max_count / max(self.update_period, self.rate))
         
+    def getRate(self):
+        return self.rate
+    
     def getOut(self):
         return (self.out['r'], self.out['g'], self.out['b'])
+    
+    def getCmd(self):
+        return (self.cmd['r'], self.cmd['g'], self.cmd['b'])
+    
+    def getErr(self):
+        return (self.err['r'], self.err['g'], self.err['b'])
     
     def update(self, time):
         self.max_step_count = round((self.rate_count * time))
         for i in ['r', 'g', 'b']:
             self.err[i] = self.cmd[i] - self.out[i]
             if (self.err[i] > 0):
-                self.out[i] = min(self.max_count, self.out[i] + min(self.max_step_count, self.err[i]))
+                self.out[i] = min(self.max_count, max(self.min_count, self.out[i] + min(self.max_step_count, self.err[i])))
             else:
-                self.out[i] = max(self.min_count, self.out[i] + max(-self.max_step_count, self.err[i]))
+                self.out[i] = max(self.min_count, min(self.max_count, self.out[i] + max(-self.max_step_count, self.err[i])))
                 
             self.pca.channels[self.channel[i]].duty_cycle = self.out[i]

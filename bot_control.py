@@ -39,6 +39,7 @@ class bot_control(tk.Frame):
         
     def personalityCallback(self):
         self.robot.setPersonality(self.personality.get())
+        self.updateWidgets()
         
     def scriptWelcomeCallback(self):
         for i in self.controls:
@@ -48,6 +49,14 @@ class bot_control(tk.Frame):
         
         for i in self.controls:
             self.controls[i]['state'] = tk.NORMAL
+
+        self.updateWidgets()
+
+    def updateWidgets(self):
+        self.eyelid_pos.set(self.robot.getMotorCmd('eyelids'))
+        self.mouth_pos.set(self.robot.getMotorCmd('mouth'))
+        self.head_yaw_pos.set(self.robot.getMotorCmd('head_yaw'))
+        self.eye_pos.set(self.robot.getMotorCmd('eyes'))
         
     def createWidgets(self):
         self.controls = dict()
@@ -91,9 +100,14 @@ class bot_control(tk.Frame):
                                                 variable=self.personality, command=self.personalityCallback)
         self.controls['radio_evil'] = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
                                                 variable=self.personality, command=self.personalityCallback)
-        self.controls['radio_good'].grid(column=0,row=0, sticky=tk.W)
-        self.controls['radio_evil'].grid(column=0,row=1, sticky=tk.W)
-        self.controls['radio_good'].select()
+        self.controls['radio_sleep'] = tk.Radiobutton(self.personalityFrame, text="Sleep",value=self.robot.SLEEP,
+                                                variable=self.personality, command=self.personalityCallback)
+        
+        self.controls['radio_sleep'].grid(column=0,row=0, sticky=tk.W)
+        self.controls['radio_good'].grid(column=0,row=1, sticky=tk.W)
+        self.controls['radio_evil'].grid(column=0,row=2, sticky=tk.W)
+        self.controls['radio_sleep'].select()
+        self.controls['radio_good'].deselect()
         self.controls['radio_evil'].deselect()
         
         self.SoundboardFrame = tk.LabelFrame(self.master, bd=1, text="Soundboard")
