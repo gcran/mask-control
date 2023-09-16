@@ -15,9 +15,12 @@ class janus():
         
         # initialize i2c bus and PCA9685 Modules
         self.i2c_bus = busio.I2C(SCL, SDA)
-        self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca1']['addr'], 16))        
-        self.pwm_period = float(self.calfile['pca1']['pwm_period'])
-        self.pca1.frequency = round(1/self.pwm_period)
+        self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca.1']['addr'], 16))
+        self.pca2 = PCA9685(self.i2c_bus, address=int(self.calfile['pca.2']['addr'], 16))
+        self.pwm1_period = float(self.calfile['pca.1']['pwm_period'])
+        self.pwm2_period = float(self.calfile['pca.2']['pwm_period'])
+        self.pca1.frequency = round(1/self.pwm1_period)
+        self.pca2.frequency = round(1/self.pwm2_period)
         
         self.test_mode = test
         
@@ -30,7 +33,7 @@ class janus():
         for i in ['eyes', 'eyelids', 'mouth', 'head_roll', 'head_yaw']:
             self.params = self.calfile[i + '.movement']
             self.params.update(self.calfile['motor.' + self.params['type']])
-            self.params['pwm_period'] = self.calfile['pca1']['pwm_period']       
+            self.params['pwm_period'] = self.calfile['pca.1']['pwm_period']       
             self.motors[i] = face_motor(self.pca1, self.params)
      
         # create light dictionary
@@ -40,7 +43,7 @@ class janus():
         for i in ['eyes', 'mouth']:
             self.params = self.calfile[i + '.lights']
             self.params['update_period'] = self.calfile['general']['update_period']
-            self.lights[i] = rgb_led_control(self.pca1, self.params)
+            self.lights[i] = rgb_led_control(self.pca2, self.params)
 
         # set mouth move/blink frequency
         self.talk_frequency = float(self.calfile['general']['mouth_frequency'])

@@ -293,6 +293,9 @@ class cal_panel(tk.Frame):
         self.controls['Welcome!'] = tk.Button(self.script_panel,text='Welcome!', padx=10, pady=10, command=self.scriptWelcomeCallback)
         self.controls['Welcome!'].grid(column=0, row=0, padx=10, pady=10)
         
+        self.controls['Shutdown'] = tk.Button(self.script_panel,text='Shutdown', padx=10, pady=10, command=self.scriptWelcomeCallback)
+        self.controls['Shutdown'].grid(column=0, row=0, padx=10, pady=10)
+        
     def on_close(self):
         self.robot.deinit()
         self.winfo_toplevel().destroy()
