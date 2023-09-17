@@ -100,7 +100,12 @@ class bot_control(tk.Frame):
             scripts.lights_blue(self.robot)    
 
         if script == 'lights_white':
-            scripts.lights_white(self.robot)    
+            scripts.lights_white(self.robot)        
+
+        self.updateWidgets()
+        
+        for i in self.controls:
+            self.controls[i]['state'] = tk.NORMAL
 
     def updateWidgets(self):
         self.eyelid_pos.set(self.robot.getMotorCmd('eyelids'))
