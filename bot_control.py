@@ -7,7 +7,7 @@ with contextlib.redirect_stdout(None):
     from pygame import mixer
 
 # import scripts
-from scripts import welcomeScript
+import scripts
 
 class bot_control(tk.Frame):
     def __init__(self, robot, master=None):
@@ -41,16 +41,66 @@ class bot_control(tk.Frame):
         self.robot.setPersonality(self.personality.get())
         self.updateWidgets()
         
-    def scriptWelcomeCallback(self):
+    def scriptCallback(self, script):
         for i in self.controls:
             self.controls[i]['state'] = tk.DISABLED
             
-        welcomeScript.welcomeScript(self.robot)
+        if script == 'blink':
+            scripts.blink(self.robot)
         
-        for i in self.controls:
-            self.controls[i]['state'] = tk.NORMAL
+        if script == 'eyes_center':
+            scripts.eyes_center(self.robot)
 
-        self.updateWidgets()
+        if script == 'eyes_closed':
+            scripts.eyes_closed(self.robot)
+
+        if script == 'eyes_half_open':
+            scripts.eyes_half_open(self.robot)
+            
+        if script == 'eyes_open':
+            scripts.eyes_open(self.robot)
+
+        if script == 'eyes_left':
+            scripts.eyes_left(self.robot)
+
+        if script == 'eyes_right':
+            scripts.eyes_right(self.robot)
+
+        if script == 'head_center':
+            scripts.head_center(self.robot)
+
+        if script == 'head_left':
+            scripts.head_left(self.robot)
+
+        if script == 'head_right':
+            scripts.head_right(self.robot)
+
+        if script == 'head_tilt_45':
+            scripts.head_tilt_45(self.robot)
+
+        if script == 'scan':
+            scripts.scan(self.robot)            
+
+        if script == 'welcome':
+            scripts.welcomeScript(self.robot)
+
+        if script == 'scan':
+            scripts.scan(self.robot)            
+
+        if script == 'lights_off':
+            scripts.lights_off(self.robot)            
+
+        if script == 'lights_red':
+            scripts.lights_red(self.robot)    
+
+        if script == 'lights_green':
+            scripts.lights_green(self.robot)    
+
+        if script == 'lights_blue':
+            scripts.lights_blue(self.robot)    
+
+        if script == 'lights_white':
+            scripts.lights_white(self.robot)    
 
     def updateWidgets(self):
         self.eyelid_pos.set(self.robot.getMotorCmd('eyelids'))
@@ -124,8 +174,42 @@ class bot_control(tk.Frame):
         self.script_panel = tk.LabelFrame(self.master, bd=1, text="Scripts", padx=10, pady=10)
         self.script_panel.grid(column=0, row=3, columnspan=3)
         
-        self.controls['Welcome !'] = tk.Button(self.script_panel,text='Welcome !', padx=10, pady=10, command=self.scriptWelcomeCallback)
-        self.controls['Welcome !'].grid(column=0, row=0, padx=10, pady=10)
+        self.controls['welcome'] = tk.Button(self.script_panel,text='Welcome!', padx=10, pady=10, command=partial(self.scriptCallback, script='welcome'))
+        self.controls['welcome'].grid(column=0, row=0, padx=10, pady=10)        
+        self.controls['blink'] = tk.Button(self.script_panel,text='Blink', padx=10, pady=10, command=partial(self.scriptCallback, script='blink'))
+        self.controls['blink'].grid(column=1, row=0, padx=10, pady=10)        
+        self.controls['eyes closed'] = tk.Button(self.script_panel,text='Eyes Closed', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_closed'))
+        self.controls['eyes closed'].grid(column=2, row=0, padx=10, pady=10)
+        self.controls['eyes half open'] = tk.Button(self.script_panel,text='Eyes Half Open', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_half_open'))
+        self.controls['eyes half open'].grid(column=3, row=0, padx=10, pady=10)
+        self.controls['eyes open'] = tk.Button(self.script_panel,text='Eyes Open', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_open'))
+        self.controls['eyes open'].grid(column=4, row=0, padx=10, pady=10)
+        self.controls['eyes left'] = tk.Button(self.script_panel,text='Eyes Left', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_left'))
+        self.controls['eyes left'].grid(column=5, row=0, padx=10, pady=10)
+        self.controls['eyes center'] = tk.Button(self.script_panel,text='Eyes Center', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_center'))
+        self.controls['eyes center'].grid(column=6, row=0, padx=10, pady=10)
+        self.controls['eyes right'] = tk.Button(self.script_panel,text='Eyes Right', padx=10, pady=10, command=partial(self.scriptCallback, script='eyes_right'))
+        self.controls['eyes right'].grid(column=7, row=0, padx=10, pady=10)
+        self.controls['head left'] = tk.Button(self.script_panel,text='Head Left', padx=10, pady=10, command=partial(self.scriptCallback, script='head_left'))
+        self.controls['head left'].grid(column=8, row=0, padx=10, pady=10)
+        self.controls['head center'] = tk.Button(self.script_panel,text='Head Center', padx=10, pady=10, command=partial(self.scriptCallback, script='head_center'))
+        self.controls['head center'].grid(column=9, row=0, padx=10, pady=10)
+        self.controls['head right'] = tk.Button(self.script_panel,text='Head Right', padx=10, pady=10, command=partial(self.scriptCallback, script='head_right'))
+        self.controls['head right'].grid(column=10, row=0, padx=10, pady=10)
+        self.controls['head tilt 45'] = tk.Button(self.script_panel,text='Head Tilt 45', padx=10, pady=10, command=partial(self.scriptCallback, script='head_tilt_45'))
+        self.controls['head tilt 45'].grid(column=11, row=0, padx=10, pady=10)
+        self.controls['scan'] = tk.Button(self.script_panel,text='Scan', padx=10, pady=10, command=partial(self.scriptCallback, script='scan'))
+        self.controls['scan'].grid(column=12, row=0, padx=10, pady=10)
+        self.controls['lights off'] = tk.Button(self.script_panel,text='Lights Off', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_off'))
+        self.controls['lights off'].grid(column=0, row=1, padx=10, pady=10)
+        self.controls['lights red'] = tk.Button(self.script_panel,text='Lights red', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_red'))
+        self.controls['lights red'].grid(column=1, row=1, padx=10, pady=10)
+        self.controls['lights green'] = tk.Button(self.script_panel,text='Lights green', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_green'))
+        self.controls['lights green'].grid(column=2, row=1, padx=10, pady=10)
+        self.controls['lights blue'] = tk.Button(self.script_panel,text='Lights blue', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_blue'))
+        self.controls['lights blue'].grid(column=3, row=1, padx=10, pady=10)
+        self.controls['lights white'] = tk.Button(self.script_panel,text='Lights white', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_white'))
+        self.controls['lights white'].grid(column=4, row=1, padx=10, pady=10)
         
     def on_close(self):
         self.robot.deinit()
