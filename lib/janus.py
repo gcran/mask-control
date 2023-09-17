@@ -75,10 +75,10 @@ class janus():
             curses.cbreak()
             curses.noecho()
 
-        self.REMOTE_CHANNEL = 4
         # set up remote trigger
+        self.REMOTE_CHANNEL = 17
         
-        GPIO.setup(self.REMOTE_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(self.REMOTE_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(self.REMOTE_CHANNEL, GPIO.RISING, callback=self.remote_trigger_callback, bouncetime=100)
 
         
@@ -162,8 +162,9 @@ class janus():
     def setStatusMsg(self, msg):
         self.statusMsg = str(msg)
 
-    def remote_trigger_callback(self):
-        scripts.welcomeScript(self)
+    def remote_trigger_callback(self, channel):
+        if GPIO.input(channel):
+            scripts.welcomeScript(self)
         
     def update_fcn(self):
         while(self.running):
