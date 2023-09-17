@@ -1,4 +1,4 @@
-def shutdown(robot: janus):
+def shutdown(robot):
     
     #zero out all motors and lights
     for i in robot.motors:
