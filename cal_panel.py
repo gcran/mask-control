@@ -83,6 +83,9 @@ class cal_panel(tk.Frame):
         if script == 'head_tilt_45':
             scripts.head_tilt_45(self.robot)
 
+        if script == 'head_straight':
+            scripts.head_straight(self.robot)
+
         if script == 'scan':
             scripts.scan(self.robot)            
 
@@ -373,8 +376,10 @@ class cal_panel(tk.Frame):
         self.controls['head right'].grid(column=10, row=0, padx=10, pady=10)
         self.controls['head tilt 45'] = tk.Button(self.script_panel,text='Head Tilt 45', padx=10, pady=10, command=partial(self.scriptCallback, script='head_tilt_45'))
         self.controls['head tilt 45'].grid(column=11, row=0, padx=10, pady=10)
+        self.controls['head straight'] = tk.Button(self.script_panel,text='Head Straight', padx=10, pady=10, command=partial(self.scriptCallback, script='head_straight'))
+        self.controls['head straight'].grid(column=12, row=0, padx=10, pady=10)
         self.controls['scan'] = tk.Button(self.script_panel,text='Scan', padx=10, pady=10, command=partial(self.scriptCallback, script='scan'))
-        self.controls['scan'].grid(column=12, row=0, padx=10, pady=10)
+        self.controls['scan'].grid(column=13, row=0, padx=10, pady=10)
         self.controls['lights off'] = tk.Button(self.script_panel,text='Lights Off', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_off'))
         self.controls['lights off'].grid(column=0, row=1, padx=10, pady=10)
         self.controls['lights red'] = tk.Button(self.script_panel,text='Lights red', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_red'))

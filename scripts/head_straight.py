@@ -1,5 +1,5 @@
 import time
-def head_tilt_45(robot):
+def head_straight(robot):
     # head tilt 45 degrees
     robot.setStatusMsg('45 degree head tilt')
     if robot.getPersonality() == robot.EVIL:

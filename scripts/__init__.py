@@ -9,6 +9,7 @@ from scripts.head_center import head_center
 from scripts.head_left import head_left
 from scripts.head_right import head_right
 from scripts.head_tilt_45 import head_tilt_45
+from scripts.head_straight import head_straight
 from scripts.scan import scan
 from scripts.welcomeScript import welcomeScript
 from scripts.lights_green import lights_green
