@@ -394,7 +394,7 @@ class cal_panel(tk.Frame):
         self.controls['lights blue'] = tk.Button(self.script_panel,text='Lights blue', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_blue'))
         self.controls['lights blue'].grid(column=3, row=2, padx=10, pady=10)
         self.controls['lights white'] = tk.Button(self.script_panel,text='Lights white', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_white'))
-        self.controls['lights white'].grid(column=4, row=1, padx=10, pady=10)
+        self.controls['lights white'].grid(column=4, row=2, padx=10, pady=10)
         
     def on_close(self):
         self.robot.deinit()
