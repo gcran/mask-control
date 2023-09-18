@@ -77,7 +77,8 @@ class janus():
 
         # set up remote trigger
         self.REMOTE_CHANNEL = 17
-        
+        self.SCRIPT_COOLDOWN = 1        
+        self.prev_time_r = time.time_ns()
         GPIO.setup(self.REMOTE_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.add_event_detect(self.REMOTE_CHANNEL, GPIO.RISING, callback=self.remote_trigger_callback, bouncetime=100)
 
@@ -163,8 +164,11 @@ class janus():
         self.statusMsg = str(msg)
 
     def remote_trigger_callback(self, channel):
-        if GPIO.input(channel):
+        self.c_time_r = time.time_ns()
+        self.e_time_r = (self.c_time_r - self.prev_time_r) * 1e-9
+        if (GPIO.input(channel) and (self.e_time_r >= self.SCRIPT_COOLDOWN)):
             scripts.welcomeScript(self)
+            self.prev_time_r = self.c_time_r
         
     def update_fcn(self):
         while(self.running):
