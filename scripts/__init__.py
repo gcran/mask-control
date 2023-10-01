@@ -17,3 +17,4 @@ from scripts.lights_off import lights_off
 from scripts.lights_red import lights_red
 from scripts.lights_blue import lights_blue
 from scripts.lights_white import lights_white
+from scripts.security_mode import security_mode
