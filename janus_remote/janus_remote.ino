@@ -4,11 +4,13 @@
 const char *ssid =  "Echelon-IV";   // name of your WiFi network
 const char *password =  "goteamventure"; // password of the WiFi network
 
-const byte SW1 = 0;           // Pin to control the light with
-const byte SW2 = 4;           // Pin to control the light with
-const byte LIGHT = 2;
+const byte SW1 = 0;           // Button 1
+const byte SW2 = 2;           // Button 2
+const byte SW3 = 15;           // Button 3
+const byte LIGHT = 4;
 int prev_sw1 = 1;
 int prev_sw2 = 1;
+int prev_sw3 = 1;
 const char *ID = "bot_remote";  // Name of our device, must be unique
 const char *TOPIC = "remote/command";  // Topic to subcribe to
 
@@ -17,7 +19,6 @@ const char* broker = "192.168.1.101";
 WiFiClient wclient;
 
 PubSubClient client(wclient); // Setup MQTT client
-int command=0;
 const char *command_str = "0";
 
 // Connect to WiFi network
@@ -63,6 +64,7 @@ void setup() {
   Serial.begin(115200); // Start serial communication at 115200 baud
   pinMode(SW1,INPUT_PULLUP);  // Configure SWITCH_Pin as an input pull-up resistor (active low)
   pinMode(SW2,INPUT_PULLUP);  // Configure SWITCH_Pin as an input pull-up resistor (active low)
+  pinMode(SW3,INPUT_PULLUP);  // Configure SWITCH_Pin as an input pull-up resistor (active low)
   pinMode(LIGHT,OUTPUT);  // Configure connection light
   digitalWrite(LIGHT, 0);
   delay(100);
@@ -91,9 +93,16 @@ void loop() {
     command_str = "Button 2";
     client.publish(TOPIC, command_str);
     Serial.println(command_str);
+  } else if((digitalRead(SW3) == 0) & (prev_sw3 == 1))
+  {
+    command_str = "Button 3";
+    client.publish(TOPIC, command_str);
+    Serial.println(command_str);
   }
 
   prev_sw1 = digitalRead(SW1);
   prev_sw2 = digitalRead(SW2);
+  prev_sw3 = digitalRead(SW3);
+  
 
 }
