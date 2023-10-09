@@ -1,13 +1,3 @@
-/******************************************************************************
-MQTT_Switch_Example.ino
-Example for controlling a light using an MQTT switch
-by: Alex Wende, SparkFun Electronics
-
-This sketch connects the ESP32 to a MQTT broker and subcribes to the topic
-room/light. When the button is pressed, the client will toggle between
-publishing "on" and "off".
-******************************************************************************/
-
 #include <WiFi.h>
 #include <PubSubClient.h>
 
