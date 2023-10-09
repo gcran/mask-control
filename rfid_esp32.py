@@ -9,7 +9,8 @@ import paho.mqtt.client as paho
     # remote control button mapping
 btn_lookup = {'Button 1': scripts.head_left,
                 'Button 2': scripts.head_center,
-                'Button 3': scripts.head_right}
+                'Button 3': scripts.head_right,
+                '2784388096': scripts.eyes_half_open}
 
 def on_message(mosq, obj, msg):
     cmd = msg.payload.decode('utf-8')
