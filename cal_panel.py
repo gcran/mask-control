@@ -111,7 +111,10 @@ class cal_panel(tk.Frame):
             scripts.lights_white(self.robot)           
 
         if script == 'security_mode':
-            scripts.security_mode(self.robot)   
+            scripts.security_mode(self.robot)
+
+        if script == 'security_mod_infinite':
+            scripts.security_mode_infinite(self.robot)      
 
 
 
@@ -385,6 +388,8 @@ class cal_panel(tk.Frame):
         self.controls['scan'].grid(column=5, row=1, padx=10, pady=10)
         self.controls['security mode'] = tk.Button(self.script_panel,text='Security Mode', padx=10, pady=10, command=partial(self.scriptCallback, script='security_mode'))
         self.controls['security mode'].grid(column=6, row=1, padx=10, pady=10)
+        self.controls['security mode_infinite'] = tk.Button(self.script_panel,text='Security Mode Infinite', padx=10, pady=10, command=partial(self.scriptCallback, script='security_mode_infinite'))
+        self.controls['security mode_infinite'].grid(column=6, row=1, padx=10, pady=10)
         self.controls['lights off'] = tk.Button(self.script_panel,text='Lights Off', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_off'))
         self.controls['lights off'].grid(column=0, row=2, padx=10, pady=10)
         self.controls['lights red'] = tk.Button(self.script_panel,text='Lights red', padx=10, pady=10, command=partial(self.scriptCallback, script='lights_red'))
