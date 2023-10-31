@@ -18,3 +18,5 @@ from scripts.lights_red import lights_red
 from scripts.lights_blue import lights_blue
 from scripts.lights_white import lights_white
 from scripts.security_mode import security_mode
+from scripts.slow_scan import slow_scan
+from scripts.security_mode_infinite import security_mode_infinite
