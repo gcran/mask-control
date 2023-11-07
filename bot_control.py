@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!./.venv/bin/python
 import tkinter as tk
 from lib.janus import janus
 from functools import partial

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!./.venv/bin/python
 import tkinter as tk
 from lib.janus import janus
 from functools import partial
@@ -406,7 +406,7 @@ class cal_panel(tk.Frame):
         self.winfo_toplevel().destroy()
         
 if __name__ == '__main__':
-    window = cal_panel(janus('calibration.ini', test=True))
+    window = cal_panel(janus('testcalibration.ini', test=True))
     window.mainloop()
     
 

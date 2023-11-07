@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!./.venv/bin/python
 
 import RPi.GPIO as GPIO
 from lib.janus import janus

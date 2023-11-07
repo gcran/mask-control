@@ -2,4 +2,4 @@
 *.pyc
 *.ogg
 *.mp3
-
+.venv/

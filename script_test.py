@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!./.venv/bin/python
 from lib.janus import janus
 import scripts
 

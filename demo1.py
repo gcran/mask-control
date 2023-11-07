@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!./.venv/bin/python
 
 from janus import janus
 import time
