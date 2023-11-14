@@ -19,7 +19,7 @@ def security_mode_infinite(robot):
     
     #wake up
     robot.setStatusMsg('Wake Up')
-    robot.setPersonality(robot.GOOD)
+    robot.setPersonality(robot.SECURITY)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
     time.sleep(3)

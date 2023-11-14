@@ -255,19 +255,19 @@ class cal_panel(tk.Frame):
         self.personalityFrame = tk.LabelFrame(self.master, bd=1, text="Personality", padx=10, pady=10)
         self.personalityFrame.grid(column=3, row=0)
         self.personality = tk.IntVar()
-        self.controls['radio_good'] = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.GOOD,
+        self.controls['radio_security'] = tk.Radiobutton(self.personalityFrame, text="Security",value=self.robot.SECURITY,
                                                 variable=self.personality, command=self.personalityCallback)
-        self.controls['radio_evil'] = tk.Radiobutton(self.personalityFrame, text="Evil",value=self.robot.EVIL,
+        self.controls['radio_friendly'] = tk.Radiobutton(self.personalityFrame, text="Good",value=self.robot.FRIENDLY,
                                                 variable=self.personality, command=self.personalityCallback)
         self.controls['radio_sleep'] = tk.Radiobutton(self.personalityFrame, text="Sleep",value=self.robot.SLEEP,
                                                 variable=self.personality, command=self.personalityCallback)
         
         self.controls['radio_sleep'].grid(column=0,row=0, sticky=tk.W)
-        self.controls['radio_good'].grid(column=0,row=1, sticky=tk.W)
-        self.controls['radio_evil'].grid(column=0,row=2, sticky=tk.W)
+        self.controls['radio_security'].grid(column=0,row=1, sticky=tk.W)
+        self.controls['radio_friendly'].grid(column=0,row=2, sticky=tk.W)
         self.controls['radio_sleep'].select()
-        self.controls['radio_good'].deselect()
-        self.controls['radio_evil'].deselect()
+        self.controls['radio_security'].deselect()
+        self.controls['radio_friendly'].deselect()
         
         # Eye Light control
         self.light_panel = tk.LabelFrame(self.master, bd=1, text="Eye Lights", padx=10, pady=10)
@@ -406,7 +406,7 @@ class cal_panel(tk.Frame):
         self.winfo_toplevel().destroy()
         
 if __name__ == '__main__':
-    window = cal_panel(janus('testcalibration.ini', test=True))
+    window = cal_panel(janus('calibration.ini', test=True))
     window.mainloop()
     
 

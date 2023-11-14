@@ -18,10 +18,12 @@ class janus():
         # initialize i2c bus and PCA9685 Modules
         self.i2c_bus = busio.I2C(SCL, SDA)
         self.pca1 = PCA9685(self.i2c_bus, address=int(self.calfile['pca.1']['addr'], 16))
+        self.pca1.reset()
         self.pwm1_period = float(self.calfile['pca.1']['pwm_period'])
         self.pca1.frequency = round(1/self.pwm1_period)
         if('pca.2' in self.calfile.keys()):
             self.pca2 = PCA9685(self.i2c_bus, address=int(self.calfile['pca.2']['addr'], 16))
+            self.pca2.reset()
             self.pwm2_period = float(self.calfile['pca.2']['pwm_period'])
             self.pca2.frequency = round(1/self.pwm2_period)
         
@@ -57,8 +59,8 @@ class janus():
         self.mouth_motor_offset = 0.5 * (self.motors['mouth'].ulim_angle - self.motors['mouth'].llim_angle)
             
         # initialize personality mode
-        self.GOOD = 0
-        self.EVIL = 1
+        self.SECURITY = 0
+        self.FRIENDLY = 1
         self.SLEEP = 2
         self.setPersonality(self.SLEEP)
         
@@ -92,10 +94,10 @@ class janus():
       
     def setPersonality(self, mode):
 
-        if (mode == self.EVIL):
+        if (mode == self.FRIENDLY):
             self.setMotorCmd('head_roll', self.motors['head_roll'].ulim_angle)
             self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
-            if (self.personality == self.GOOD):
+            if (self.personality == self.SECURITY):
                 self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
 
             
@@ -106,10 +108,10 @@ class janus():
                                     int(self.calfile['color.evil']['mouth_green'], 16),
                                     int(self.calfile['color.evil']['mouth_blue'], 16))
             
-        elif (mode == self.GOOD):
+        elif (mode == self.SECURITY):
             self.setMotorCmd('head_roll', self.motors['head_roll'].llim_angle)
             self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
-            if (self.personality == self.EVIL):
+            if (self.personality == self.FRIENDLY):
                 self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
 
             self.lights['eyes'].setCmd(int(self.calfile['color.good']['eyes_red'], 16),
@@ -182,7 +184,7 @@ class janus():
                     
                     self.talk_osc = math.sin(time.time() * math.tau * self.talk_frequency)
                     
-                    if (self.getPersonality() == self.GOOD):
+                    if (self.getPersonality() == self.SECURITY):
                         if not self.prev_talking:
                             self.mouth_amp = self.lights['mouth'].getOut()
                             self.mouth_light_offset = (self.mouth_amp[0] * 0.5, self.mouth_amp[1] * 0.5, self.mouth_amp[2] * 0.5)
@@ -192,7 +194,7 @@ class janus():
                                          (self.mouth_light_offset[1] * self.talk_osc) + self.mouth_light_offset[1],
                                          (self.mouth_light_offset[2] * self.talk_osc) + self.mouth_light_offset[2])
                                                                         
-                    elif (self.getPersonality() == self.EVIL):
+                    elif (self.getPersonality() == self.FRIENDLY):
                         if not self.prev_talking:
                             self.setMotorRate('mouth', 360)
 
@@ -203,10 +205,10 @@ class janus():
 
                 else:
                     if self.prev_talking:
-                        if (self.getPersonality() == self.GOOD):
+                        if (self.getPersonality() == self.SECURITY):
                             self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])                            
                             self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
-                        elif (self.getPersonality() == self.EVIL):
+                        elif (self.getPersonality() == self.FRIENDLY):
                             self.setMotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
                             self.setMotorCmd('mouth', self.motors['mouth'].init_angle)
                         
@@ -246,6 +248,9 @@ class janus():
     def deinit(self):
         self.running = False
         self.output_thread.join()
+        self.pca1.deinit()
+        if('pca.2' in self.calfile.keys()):
+            self.pca2.deinit()
         if(self.test_mode):
             curses.nocbreak()
             curses.echo()

@@ -13,7 +13,7 @@ def welcomeScript(robot):
     time.sleep(2)
     
     #wake up
-    robot.setPersonality(robot.GOOD)
+    robot.setPersonality(robot.SECURITY)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
     time.sleep(1)
@@ -31,7 +31,7 @@ def welcomeScript(robot):
         time.sleep(robot.update_period)
         
     # talk
-    robot.setStatusMsg('talk')
+    robot.setStatusMsg( 'talk')
     robot.playSound('c-3po')
     time.sleep(robot.update_period)
     while (robot.isTalking()):
@@ -40,7 +40,7 @@ def welcomeScript(robot):
     time.sleep(1)
     #blink
     robot.setStatusMsg('flip head')
-    robot.setPersonality(robot.EVIL)
+    robot.setPersonality(robot.FRIENDLY)
     time.sleep(robot.update_period)
     while((abs(robot.motors['head_roll'].getErr()) > 1)):
         time.sleep(robot.update_period)
