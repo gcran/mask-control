@@ -96,7 +96,7 @@ class janus():
 
         if (mode == self.FRIENDLY):
             self.setMotorCmd('head_roll', self.motors['head_roll'].ulim_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
+            self.setMotorCmd('eyelids', self.motors['eyelids'].llim_angle)
             if (self.personality == self.SECURITY):
                 self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
 
@@ -110,7 +110,7 @@ class janus():
             
         elif (mode == self.SECURITY):
             self.setMotorCmd('head_roll', self.motors['head_roll'].llim_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
+            self.setMotorCmd('eyelids', self.motors['eyelids'].llim_angle)
             if (self.personality == self.FRIENDLY):
                 self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
 
@@ -122,7 +122,7 @@ class janus():
                                     int(self.calfile['color.good']['mouth_blue'], 16))
         else:
             self.setMotorCmd('eyes', self.motors['eyes'].init_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].llim_angle)
+            self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
             self.lights['eyes'].setCmd(int(self.calfile['color.sleep']['eyes_red'], 16),
                                     int(self.calfile['color.sleep']['eyes_green'], 16),
                                     int(self.calfile['color.sleep']['eyes_blue'], 16))

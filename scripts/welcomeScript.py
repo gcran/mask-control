@@ -20,12 +20,12 @@ def welcomeScript(robot):
     
     #blink
     robot.setStatusMsg('blink')
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)): 
         time.sleep(robot.update_period)
@@ -97,12 +97,12 @@ def welcomeScript(robot):
     
     #blink
     robot.setStatusMsg('blink')
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
@@ -121,12 +121,12 @@ def welcomeScript(robot):
         
     #blink
     robot.setStatusMsg('blink')
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)
         
-    robot.setMotorCmd('eyelids', robot.motors['eyelids'].ulim_angle)
+    robot.setMotorCmd('eyelids', robot.motors['eyelids'].llim_angle)
     time.sleep(robot.update_period)
     while((abs(robot.motors['eyelids'].getErr()) > 1)):
         time.sleep(robot.update_period)

@@ -2,18 +2,41 @@ import time
 import scripts
 
 def welcome_demo(robot):
-    scripts.eyes_open(robot)
-    robot.playSound('welcome')
-    robot.setPersonality(robot.SECURITY)
-    time.sleep(2)
-    scripts.eyes_half_open(robot)
-    scripts.eyes_left(robot)
-    scripts.eyes_right(robot)
-    scripts.blink(robot)
     robot.setPersonality(robot.FRIENDLY)
-    scripts.blink(robot)
+    time.sleep(robot.update_period)
+    while((abs(robot.motors['head_roll'].getErr()) > 1)):
+        time.sleep(robot.update_period)
+        
+    robot.playSound('welcome')
+    while (robot.isTalking()):
+        time.sleep(robot.update_period)
+    
+    robot.setPersonality(robot.SECURITY)
+    time.sleep(robot.update_period)
+    while((abs(robot.motors['head_roll'].getErr()) > 1)):
+        time.sleep(robot.update_period)
+    
+    scripts.eyes_half_open(robot)
+    time.sleep(1)
+    robot.playSound('registering noise')
+    while (robot.isTalking()):
+        time.sleep(robot.update_period)
+        
     scripts.eyes_left(robot)
+    time.sleep(1)
     scripts.eyes_right(robot)
+    time.sleep(1)
+    scripts.eyes_center(robot)
+    time.sleep(1)
+    scripts.blink(robot)
+    time.sleep(1)
+    robot.setPersonality(robot.FRIENDLY)
+    time.sleep(1)
+    scripts.blink(robot)
+    time.sleep(1)
+    robot.playSound('all that is left')
+    while (robot.isTalking()):
+        time.sleep(robot.update_period)
 
 
 

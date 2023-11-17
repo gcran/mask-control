@@ -10,7 +10,11 @@ import paho.mqtt.client as paho
 btn_lookup = {'Button 1': scripts.head_left,
                 'Button 2': scripts.head_center,
                 'Button 3': scripts.head_right,
-                '2784388096': scripts.eyes_half_open}
+                '2774745088': scripts.eyes_half_open,
+                '74090265': scripts.welcome_demo,
+                '76765212': scripts.security_mode,
+                '1648833105': scripts.slow_scan,
+                '83267831': scripts.welcomeScript}
 
 def on_message(mosq, obj, msg):
     cmd = msg.payload.decode('utf-8')
@@ -26,11 +30,11 @@ def on_message(mosq, obj, msg):
 if __name__ == "__main__":
     #tag lookup table. Tag ID: script
     tag_lookup = {712803352631: scripts.blink,
-                  422390288647: scripts.security_mode}
+                  2774745088: scripts.security_mode}
     
 
 
-    bot = janus('testcalibration.ini', test=True)
+    bot = janus('calibration.ini', test=True)
     reader = SimpleMFRC522()
     mqtt_client = paho.Client()
     mqtt_client.on_message = on_message
