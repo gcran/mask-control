@@ -2,37 +2,76 @@
 #include <PubSubClient.h>
 #include <SPI.h>
 #include <MFRC522.h>
-
-const char *ssid =  "Echelon-IV";   // name of your WiFi network
-const char *password =  "goteamventure"; // password of the WiFi network
+#include <WiFiManager.h>
 
 const char *ID = "bot_rfid";  // Name of our device, must be unique
 const char *TOPIC = "remote/command";  // Topic to subcribe to
 
-const char* broker = "192.168.1.101";
+const char* broker = "j4n-u5.local";
 WiFiClient wclient;
 
 PubSubClient client(wclient); // Setup MQTT client
 char command_str[50];
 
+// Define WiFiManager Object
+WiFiManager wm;
 
 const int RST_PIN = 0;  
 const int SS_PIN = 5; 
 MFRC522 mfrc522(SS_PIN, RST_PIN);  // Create MFRC522 instance
 
+void configModeCallback(WiFiManager *myWiFiManager)
+// Called when config mode launched
+{
+  Serial.println("Entered Configuration Mode");
+ 
+  Serial.print("Config SSID: ");
+  Serial.println(myWiFiManager->getConfigPortalSSID());
+ 
+  Serial.print("Config IP Address: ");
+  Serial.println(WiFi.softAPIP());
+}
+
 // Connect to WiFi network
 void setup_wifi() {
-  Serial.print("\nConnecting to ");
-  Serial.println(ssid);
+  // Change to true when testing to force configuration every time we run
+  bool forceConfig = false;
 
-  WiFi.begin(ssid, password); // Connect to network
+  // Explicitly set WiFi mode
+  WiFi.mode(WIFI_STA);
+ 
+  // Set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
+  wm.setAPCallback(configModeCallback);
 
-  while (WiFi.status() != WL_CONNECTED) { // Wait for connection
-    delay(500);
-    Serial.print(".");
+  //set timeout for network connection attempt
+  wm.setConnectTimeout(30);
+ 
+  if (forceConfig)
+    // Run if we need a configuration
+  {
+    if (!wm.startConfigPortal("ESP_CONFIG", "password"))
+    {
+      Serial.println("failed to connect and hit timeout");
+      delay(3000);
+      //reset and try again, or maybe put it to deep sleep
+      ESP.restart();
+      delay(5000);
+    }
+  }
+  else
+  {
+    if (!wm.autoConnect("ESP_CONFIG", "password"))
+    {
+      Serial.println("failed to connect and hit timeout");
+      delay(3000);
+      // if we still have not connected restart and try all over again
+      ESP.restart();
+      delay(5000);
+    }
   }
 
-  Serial.println();
+  // If we get here, we are connected to the WiFi 
+  Serial.println("");
   Serial.println("WiFi connected");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
@@ -74,15 +113,22 @@ unsigned long getID() {
 
 void setup() {
   Serial.begin(115200); // Start serial communication at 115200 baud
+  setup_wifi(); // Connect to network  
   SPI.begin();			// Init SPI bus
 	mfrc522.PCD_Init();		// Init MFRC522
   delay(100);
   mfrc522.PCD_DumpVersionToSerial();
-  setup_wifi(); // Connect to network
+  
   client.setServer(broker, 1883);
 }
 
 void loop() {
+  //clear wifi settings and reconfigure when BOOT button pressed
+  if(digitalRead(RST_PIN) == LOW) {
+    wm.resetSettings();
+    setup_wifi();
+  }
+
   if (!client.connected())  // Reconnect if connection is lost
   {
     // digitalWrite(LIGHT, 0);
