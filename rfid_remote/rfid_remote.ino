@@ -7,7 +7,7 @@
 const char *ID = "bot_rfid";  // Name of our device, must be unique
 const char *TOPIC = "remote/command";  // Topic to subcribe to
 
-const char* broker = "j4n-u5.local";
+const char* broker = "raspberrypi.local";
 WiFiClient wclient;
 
 PubSubClient client(wclient); // Setup MQTT client
