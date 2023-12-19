@@ -40,6 +40,9 @@ void setup_wifi() {
   // Explicitly set WiFi mode
   WiFi.mode(WIFI_STA);
  
+  // Reset settings (only for development)
+  //wm.resetSettings();
+ 
   // Set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wm.setAPCallback(configModeCallback);
 
@@ -79,22 +82,19 @@ void setup_wifi() {
 
 // Reconnect to client
 void reconnect() {
-  // Loop until we're reconnected
-  while (!client.connected()) {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect(ID)) {
-      Serial.println("connected");
-      Serial.print("Publishing to: ");
-      Serial.println(TOPIC);
-      Serial.println('\n');
-      // digitalWrite(LIGHT, 1);
+  Serial.print("Attempting MQTT connection...");
+  // Attempt to connect
+  if (client.connect(ID)) {
+    Serial.println("connected");
+    Serial.print("Publishing to: ");
+    Serial.println(TOPIC);
+    Serial.println('\n');
+    // digitalWrite(LIGHT, 1);
 
-    } else {
-      Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
-      delay(5000);
-    }
+  } else {
+    Serial.println(" Connection failed, retrying");
+    // Wait 5 seconds before retrying
+    // delay(5000);
   }
 }
 
@@ -123,10 +123,11 @@ void setup() {
 }
 
 void loop() {
-  //clear wifi settings and reconfigure when BOOT button pressed
+  //clear wifi settings and reconfigure when BOOT button pressedd
   if(digitalRead(RST_PIN) == LOW) {
     wm.resetSettings();
     setup_wifi();
+    mfrc522.PCD_Init();		// Init MFRC522
   }
 
   if (!client.connected())  // Reconnect if connection is lost
