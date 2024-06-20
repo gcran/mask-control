@@ -1,6 +1,6 @@
 #!./.venv/bin/python
 import tkinter as tk
-from lib.janus import janus
+from lib.mask import mask
 from functools import partial
 import contextlib
 with contextlib.redirect_stdout(None):

@@ -9,7 +9,7 @@ import scripts
 with contextlib.redirect_stdout(None):
     from pygame import mixer
 
-class janus():
+class mask():
     def __init__(self, filename, test=False):
         # load calibration file
         self.calfile = configparser.ConfigParser()
@@ -35,7 +35,7 @@ class janus():
         
         # create motor dictionary
         self.motors = dict()
-        for i in ['eyes', 'eyelids', 'mouth', 'head_roll', 'head_yaw']:
+        for i in ['tilt', 'pan']:
             self.params = self.calfile[i + '.movement']
             self.params.update(self.calfile['motor.' + self.params['type']])
             self.params['pwm_period'] = self.calfile['pca.1']['pwm_period']       
@@ -45,7 +45,7 @@ class janus():
         self.LIGHT_MIN = 0
         self.LIGHT_MAX = 0xFFFF
         self.lights = dict()
-        for i in ['eyes', 'mouth']:
+        for i in ['eyes']:
             self.params = self.calfile[i + '.lights']
             self.params['update_period'] = self.calfile['general']['update_period']
             if('pca.2' in self.calfile.keys()):
@@ -53,23 +53,6 @@ class janus():
             else:
                 self.lights[i] = rgb_led_control(self.pca1, self.params)
 
-        # set mouth move/blink frequency
-        self.talk_frequency = float(self.calfile['general']['mouth_frequency'])
-        self.prev_talking = False
-        self.mouth_motor_offset = 0.5 * (self.motors['mouth'].ulim_angle - self.motors['mouth'].llim_angle)
-            
-        # initialize personality mode
-        self.SECURITY = 0
-        self.FRIENDLY = 1
-        self.SLEEP = 2
-        self.setPersonality(self.SLEEP)
-        
-        # create sound dictionary
-        mixer.init()
-        self.sounds = dict()
-        for i in list(self.calfile['sounds']):
-            self.sounds[i] = mixer.Sound(os.path.abspath(self.calfile['sounds'][i]))
-            
         # set up test output screen
         self.statusMsg = ''
         if self.test_mode:
@@ -77,63 +60,11 @@ class janus():
             curses.cbreak()
             curses.noecho()
 
-        # set up remote trigger
-        self.REMOTE_CHANNEL = 17
-        self.SCRIPT_COOLDOWN = 1        
-        self.prev_time_r = time.time_ns()
-        GPIO.setup(self.REMOTE_CHANNEL, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(self.REMOTE_CHANNEL, GPIO.RISING, callback=self.remote_trigger_callback, bouncetime=100)
-
-        
         # initialize output thread
         self.running = True
         self.prev_time = time.time_ns()
         self.output_thread = threading.Thread(target = self.update_fcn, daemon = True)
         self.output_thread.start()
-        
-      
-    def setPersonality(self, mode):
-
-        if (mode == self.FRIENDLY):
-            self.setMotorCmd('head_roll', self.motors['head_roll'].ulim_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].llim_angle)
-            if (self.personality == self.SECURITY):
-                self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
-
-            
-            self.lights['eyes'].setCmd(int(self.calfile['color.evil']['eyes_red'], 16),
-                                    int(self.calfile['color.evil']['eyes_green'], 16),
-                                    int(self.calfile['color.evil']['eyes_blue'], 16))
-            self.lights['mouth'].setCmd(int(self.calfile['color.evil']['mouth_red'], 16),
-                                    int(self.calfile['color.evil']['mouth_green'], 16),
-                                    int(self.calfile['color.evil']['mouth_blue'], 16))
-            
-        elif (mode == self.SECURITY):
-            self.setMotorCmd('head_roll', self.motors['head_roll'].llim_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].llim_angle)
-            if (self.personality == self.FRIENDLY):
-                self.setMotorCmd('eyes', self.motors['eyes'].ulim_angle - (self.getMotorCmd('eyes') - self.motors['eyes'].llim_angle))
-
-            self.lights['eyes'].setCmd(int(self.calfile['color.good']['eyes_red'], 16),
-                                    int(self.calfile['color.good']['eyes_green'], 16),
-                                    int(self.calfile['color.good']['eyes_blue'], 16))
-            self.lights['mouth'].setCmd(int(self.calfile['color.good']['mouth_red'], 16),
-                                    int(self.calfile['color.good']['mouth_green'], 16),
-                                    int(self.calfile['color.good']['mouth_blue'], 16))
-        else:
-            self.setMotorCmd('eyes', self.motors['eyes'].init_angle)
-            self.setMotorCmd('eyelids', self.motors['eyelids'].ulim_angle)
-            self.lights['eyes'].setCmd(int(self.calfile['color.sleep']['eyes_red'], 16),
-                                    int(self.calfile['color.sleep']['eyes_green'], 16),
-                                    int(self.calfile['color.sleep']['eyes_blue'], 16))
-            self.lights['mouth'].setCmd(int(self.calfile['color.sleep']['mouth_red'], 16),
-                                    int(self.calfile['color.sleep']['mouth_green'], 16),
-                                    int(self.calfile['color.sleep']['mouth_blue'], 16))
-                
-        self.personality = mode
-    
-    def getPersonality(self):
-        return self.personality
     
     def setMotorCmd(self, motor, cmd):
         self.motors[motor].setCmd(cmd)
@@ -153,25 +84,12 @@ class janus():
     def setCrossfadeRate(self, light, rate):
         self.lights[light].setRate(rate)
     
-    def playSound(self, sound):
-        if sound in self.sounds:
-            mixer.stop()
-            self.sounds[sound].play()
-            self.setStatusMsg('Playing: ' + sound)
-                
     def isTalking(self):
         return mixer.get_busy()
         
     def setStatusMsg(self, msg):
         self.statusMsg = str(msg)
 
-    def remote_trigger_callback(self, channel):
-        self.c_time_r = time.time_ns()
-        self.e_time_r = (self.c_time_r - self.prev_time_r) * 1e-9
-        if (GPIO.input(channel) and (self.e_time_r >= self.SCRIPT_COOLDOWN)):
-            scripts.welcomeScript(self)
-            self.prev_time_r = self.c_time_r
-        
     def update_fcn(self):
         while(self.running):
             self.c_time = time.time_ns()

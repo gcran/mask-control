@@ -2,7 +2,7 @@
 
 import time
 import scripts
-import lib.janus as janus
+import lib.mask as mask
 
 
 def security_mode_infinite(robot):
@@ -40,5 +40,5 @@ def security_mode_infinite(robot):
     robot.setPersonality(robot.SLEEP)
         
 if (__name__ == '__main__'):   
-    bot = janus('calibration.ini', test=True)
+    bot = mask('calibration.ini', test=True)
     security_mode_infinite(bot)

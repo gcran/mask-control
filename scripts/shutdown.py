@@ -8,6 +8,6 @@ def shutdown(robot):
         robot.lights[i].setCmd(0, 0, 0)
         
 if (__name__ == '__main__'):   
-    from lib.janus import janus
-    robot = janus('calibration.ini', test=False)
+    from lib.mask import mask
+    robot = mask('calibration.ini', test=False)
     shutdown(robot)
