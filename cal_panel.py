@@ -1,6 +1,6 @@
 #!./.venv/bin/python
 import tkinter as tk
-from lib.mask import janus
+from lib.mask import mask
 from functools import partial
 import contextlib
 
@@ -67,7 +67,7 @@ class cal_panel(tk.Frame):
         # Pan Motor Slider
         self.pan_pos = tk.DoubleVar()
         self.pan_pos.set(self.robot.motors['pan'].init_angle)
-        self.controls['pan_pos'] = tk.Scale(self.pan_frame,label="Pan Position", orient=tk.VERTICAL, from_=self.robot.motors['pan'].llim_angle,
+        self.controls['pan_pos'] = tk.Scale(self.motor_frame,label="Pan Position", orient=tk.VERTICAL, from_=self.robot.motors['pan'].llim_angle,
                                     to=self.robot.motors['pan'].ulim_angle, variable=self.pan_pos, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=partial(self.motorPositionSliderCallback, motor='pan'))
         self.controls['pan_pos'].grid(column=2, row=0, padx=10, pady=10, rowspan=3)
@@ -75,7 +75,7 @@ class cal_panel(tk.Frame):
         # Pan Motor Rate Slider
         self.pan_rate = tk.DoubleVar()
         self.pan_rate.set(self.robot.motors['pan'].rate)
-        self.controls['pan_rate'] = tk.Scale(self.pan_frame,label="Pan Rate", orient=tk.VERTICAL, from_=360,
+        self.controls['pan_rate'] = tk.Scale(self.motor_frame,label="Pan Rate", orient=tk.VERTICAL, from_=360,
                                     to=0, variable=self.pan_rate, length=self.V_SCALE_LEN,
                                     resolution=1, command=partial(self.motorRateSliderCallback, motor='pan'))
         self.controls['pan_rate'].grid(column=3, row=0, padx=10, pady=10, rowspan=3)
@@ -87,7 +87,7 @@ class cal_panel(tk.Frame):
         
         # Red slider
         self.eyes_red_pos = tk.IntVar()
-        self.eyes_red_pos.set(self.robot.lights['eyes'].getOut()[0])
+        self.eyes_red_pos.set(self.robot.lights['lights'].getOut()[0])
         self.controls['eyes_red_pos'] = tk.Scale(self.light_panel,label="R", orient=tk.VERTICAL, from_=65535,
                                     to=0, variable=self.eyes_red_pos, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=self.eyesColorCallback)
@@ -95,7 +95,7 @@ class cal_panel(tk.Frame):
         
         # Green slider
         self.eyes_green_pos = tk.IntVar()
-        self.eyes_green_pos.set(self.robot.lights['eyes'].getOut()[1])
+        self.eyes_green_pos.set(self.robot.lights['lights'].getOut()[1])
         self.controls['eyes_green_pos'] = tk.Scale(self.light_panel,label="G", orient=tk.VERTICAL, from_=65535,
                                     to=0, variable=self.eyes_green_pos, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=self.eyesColorCallback)
@@ -103,7 +103,7 @@ class cal_panel(tk.Frame):
         
         # Blue slider
         self.eyes_blue_pos = tk.IntVar()
-        self.eyes_blue_pos.set(self.robot.lights['eyes'].getOut()[2])
+        self.eyes_blue_pos.set(self.robot.lights['lights'].getOut()[2])
         self.controls['eyes_blue_pos'] = tk.Scale(self.light_panel,label="B", orient=tk.VERTICAL, from_=65535,
                                     to=0, variable=self.eyes_blue_pos, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=self.eyesColorCallback)
@@ -111,7 +111,7 @@ class cal_panel(tk.Frame):
         
         # fade rate slider
         self.eyes_light_fade_rate = tk.DoubleVar()
-        self.eyes_light_fade_rate.set(self.robot.lights['eyes'].rate)
+        self.eyes_light_fade_rate.set(self.robot.lights['lights'].rate)
         self.controls['eye_light_fade_rate'] = tk.Scale(self.light_panel,label="Fade Rate", orient=tk.VERTICAL, from_=10,
                                     to=0, variable=self.eyes_light_fade_rate, length=self.V_SCALE_LEN,
                                     resolution=self.SCALE_RES, command=partial(self.fadeRateCallback, light = 'eyes'))
@@ -123,7 +123,7 @@ class cal_panel(tk.Frame):
         self.winfo_toplevel().destroy()
         
 if __name__ == '__main__':
-    window = cal_panel(janus('calibration.ini', test=True))
+    window = cal_panel(mask('testcalibration.ini', test=True))
     window.mainloop()
     
 

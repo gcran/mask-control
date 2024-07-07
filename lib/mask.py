@@ -5,7 +5,6 @@ import RPi.GPIO as GPIO
 import os, curses, configparser, time, threading, contextlib, math
 from lib.face_motor import *
 from lib.rgb_led_control import *
-import scripts
 with contextlib.redirect_stdout(None):
     from pygame import mixer
 
@@ -36,7 +35,7 @@ class mask():
         # create motor dictionary
         self.motors = dict()
         for i in ['tilt', 'pan']:
-            self.params = self.calfile[i + '.movement']
+            self.params = self.calfile['eyes.' + i]
             self.params.update(self.calfile['motor.' + self.params['type']])
             self.params['pwm_period'] = self.calfile['pca.1']['pwm_period']       
             self.motors[i] = face_motor(self.pca1, self.params)
@@ -45,8 +44,8 @@ class mask():
         self.LIGHT_MIN = 0
         self.LIGHT_MAX = 0xFFFF
         self.lights = dict()
-        for i in ['eyes']:
-            self.params = self.calfile[i + '.lights']
+        for i in ['lights']:
+            self.params = self.calfile['eyes.' + i]
             self.params['update_period'] = self.calfile['general']['update_period']
             if('pca.2' in self.calfile.keys()):
                 self.lights[i] = rgb_led_control(self.pca2, self.params)
@@ -97,42 +96,7 @@ class mask():
             if (self.e_time >= self.update_period):
                 self.prev_time = self.c_time
                 
-                # if a sound is playing, flap the mouth/blink the mouth lights, depending on personality
-                if self.isTalking():
-                    
-                    self.talk_osc = math.sin(time.time() * math.tau * self.talk_frequency)
-                    
-                    if (self.getPersonality() == self.SECURITY):
-                        if not self.prev_talking:
-                            self.mouth_amp = self.lights['mouth'].getOut()
-                            self.mouth_light_offset = (self.mouth_amp[0] * 0.5, self.mouth_amp[1] * 0.5, self.mouth_amp[2] * 0.5)
-                            self.setCrossfadeRate('mouth', 0)
-                        
-                        self.setLightCmd('mouth', (self.mouth_light_offset[0] * self.talk_osc) + self.mouth_light_offset[0],
-                                         (self.mouth_light_offset[1] * self.talk_osc) + self.mouth_light_offset[1],
-                                         (self.mouth_light_offset[2] * self.talk_osc) + self.mouth_light_offset[2])
-                                                                        
-                    elif (self.getPersonality() == self.FRIENDLY):
-                        if not self.prev_talking:
-                            self.setMotorRate('mouth', 360)
-
-                        self.setMotorCmd('mouth', (self.mouth_motor_offset * self.talk_osc) + self.mouth_motor_offset)
-                        
-
-                    self.prev_talking = True
-
-                else:
-                    if self.prev_talking:
-                        if (self.getPersonality() == self.SECURITY):
-                            self.setLightCmd('mouth', self.mouth_amp[0], self.mouth_amp[1], self.mouth_amp[2])                            
-                            self.setCrossfadeRate('mouth', float(self.calfile['mouth.lights']['rate']))
-                        elif (self.getPersonality() == self.FRIENDLY):
-                            self.setMotorRate('mouth', float(self.calfile['mouth.movement']['rate']))
-                            self.setMotorCmd('mouth', self.motors['mouth'].init_angle)
-                        
-                        self.prev_talking = False
-                
-                
+             
                 # send motor commands
                 for i in self.motors:
                     self.motors[i].update(self.e_time)
