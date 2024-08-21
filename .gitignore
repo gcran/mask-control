@@ -3,3 +3,4 @@
 *.ogg
 *.mp3
 .venv/
+.vscode/

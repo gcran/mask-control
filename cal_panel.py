@@ -2,10 +2,6 @@
 import tkinter as tk
 from lib.mask import mask
 from functools import partial
-import contextlib
-
-with contextlib.redirect_stdout(None):
-    from pygame import mixer
 
 class cal_panel(tk.Frame):
     def __init__(self, robot, master=None):
@@ -50,34 +46,34 @@ class cal_panel(tk.Frame):
         
         # Tilt Motor Slider
         self.tilt_pos = tk.DoubleVar()
-        self.tilt_pos.set(self.robot.motors['tilt'].init_angle)
-        self.controls['tilt_pos'] = tk.Scale(self.motor_frame,label="Tilt Position", orient=tk.VERTICAL, from_=self.robot.motors['tilt'].llim_angle,
-                                    to=self.robot.motors['tilt'].ulim_angle, variable=self.tilt_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=partial(self.motorPositionSliderCallback, motor='tilt'))
+        self.tilt_pos.set(self.robot.motors['ltilt'].init_angle)
+        self.controls['tilt_pos'] = tk.Scale(self.motor_frame,label="Tilt Position", orient=tk.VERTICAL, from_=self.robot.motors['ltilt'].llim_angle,
+                                    to=self.robot.motors['ltilt'].ulim_angle, variable=self.tilt_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=partial(self.motorPositionSliderCallback, motor='ltilt'))
         self.controls['tilt_pos'].grid(column=0, row=0, padx=10, pady=10, rowspan=3)
         
         # Tilt Motor Rate Slider
         self.tilt_rate = tk.DoubleVar()
-        self.tilt_rate.set(self.robot.motors['tilt'].rate)
+        self.tilt_rate.set(self.robot.motors['ltilt'].rate)
         self.controls['tilt_rate'] = tk.Scale(self.motor_frame,label="Tilt Rate", orient=tk.VERTICAL, from_=360,
                                     to=0, variable=self.tilt_rate, length=self.V_SCALE_LEN,
-                                    resolution=1, command=partial(self.motorRateSliderCallback, motor='tilt'))
+                                    resolution=1, command=partial(self.motorRateSliderCallback, motor='ltilt'))
         self.controls['tilt_rate'].grid(column=1, row=0, padx=10, pady=10, rowspan=3)
         
         # Pan Motor Slider
         self.pan_pos = tk.DoubleVar()
-        self.pan_pos.set(self.robot.motors['pan'].init_angle)
-        self.controls['pan_pos'] = tk.Scale(self.motor_frame,label="Pan Position", orient=tk.VERTICAL, from_=self.robot.motors['pan'].llim_angle,
-                                    to=self.robot.motors['pan'].ulim_angle, variable=self.pan_pos, length=self.V_SCALE_LEN,
-                                    resolution=self.SCALE_RES, command=partial(self.motorPositionSliderCallback, motor='pan'))
+        self.pan_pos.set(self.robot.motors['lpan'].init_angle)
+        self.controls['pan_pos'] = tk.Scale(self.motor_frame,label="Pan Position", orient=tk.VERTICAL, from_=self.robot.motors['lpan'].llim_angle,
+                                    to=self.robot.motors['lpan'].ulim_angle, variable=self.pan_pos, length=self.V_SCALE_LEN,
+                                    resolution=self.SCALE_RES, command=partial(self.motorPositionSliderCallback, motor='lpan'))
         self.controls['pan_pos'].grid(column=2, row=0, padx=10, pady=10, rowspan=3)
         
         # Pan Motor Rate Slider
         self.pan_rate = tk.DoubleVar()
-        self.pan_rate.set(self.robot.motors['pan'].rate)
+        self.pan_rate.set(self.robot.motors['lpan'].rate)
         self.controls['pan_rate'] = tk.Scale(self.motor_frame,label="Pan Rate", orient=tk.VERTICAL, from_=360,
                                     to=0, variable=self.pan_rate, length=self.V_SCALE_LEN,
-                                    resolution=1, command=partial(self.motorRateSliderCallback, motor='pan'))
+                                    resolution=1, command=partial(self.motorRateSliderCallback, motor='lpan'))
         self.controls['pan_rate'].grid(column=3, row=0, padx=10, pady=10, rowspan=3)
         
        
@@ -121,9 +117,9 @@ class cal_panel(tk.Frame):
     def on_close(self):
         self.robot.deinit()
         self.winfo_toplevel().destroy()
-        
+      
 if __name__ == '__main__':
-    window = cal_panel(mask('testcalibration.ini', test=True))
+    window = cal_panel(mask('calibration.ini', test=False))
     window.mainloop()
     
 

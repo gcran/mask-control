@@ -5,8 +5,6 @@ import RPi.GPIO as GPIO
 import os, curses, configparser, time, threading, contextlib, math
 from lib.face_motor import *
 from lib.rgb_led_control import *
-with contextlib.redirect_stdout(None):
-    from pygame import mixer
 
 class mask():
     def __init__(self, filename, test=False):
@@ -34,7 +32,7 @@ class mask():
         
         # create motor dictionary
         self.motors = dict()
-        for i in ['tilt', 'pan']:
+        for i in ['ltilt', 'lpan', 'rtilt', 'rpan']:
             self.params = self.calfile['eyes.' + i]
             self.params.update(self.calfile['motor.' + self.params['type']])
             self.params['pwm_period'] = self.calfile['pca.1']['pwm_period']       
@@ -82,10 +80,7 @@ class mask():
             
     def setCrossfadeRate(self, light, rate):
         self.lights[light].setRate(rate)
-    
-    def isTalking(self):
-        return mixer.get_busy()
-        
+            
     def setStatusMsg(self, msg):
         self.statusMsg = str(msg)
 
@@ -99,7 +94,7 @@ class mask():
              
                 # send motor commands
                 for i in self.motors:
-                    self.motors[i].update(self.e_time)
+                    self.motors[i].update()
                 
                 # send light commands
                 for i in self.lights:

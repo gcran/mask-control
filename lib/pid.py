@@ -19,9 +19,8 @@ class pid:
     def update(self, err):
 
         self.currTime = time.time()
-        self.prevTime = self.currTime
         deltaTime = self.currTime - self.prevTime
-        deltaError = err - self.prevError
+        deltaError = err - self.prevErr
 
         self.cP = self.kP * err
 
@@ -29,6 +28,6 @@ class pid:
 
         self.cD = self.kI * (deltaError / deltaTime) if deltaTime > 0 else 0
 
-        self.prevTime self.currTime
+        self.prevTime = self.currTime
         self.prevErr = err
         return sum([self.cP, self.cI, self.cD])
